@@ -1,40 +1,42 @@
 #include "../include/strings.h"
 
-char *replace_str(char *str, char *orig, char *rep) {
-  char *ret;
+char* replace_str(char* input_string, char* old_string, char* new_string) {
+  char* result_string;
   int i, count = 0;
-  size_t newlen = strlen(rep);
-  size_t oldlen = strlen(orig);
-  for (i = 0; str[i] != '\0'; i++) {
-    if (strstr(&str[i], orig) == &str[i]) {
+  size_t new_length = strlen(new_string);
+  size_t old_length = strlen(old_string);
+  size_t input_length = strlen(input_string);
+  for (i = 0; input_string[i] != '\0'; i++) {
+    if (strstr(&input_string[i], old_string) == &input_string[i]) {
       count++;
-      i += oldlen - 1;
+      i += old_length - 1;
     }
   }
-  ret = malloc(i + count * (newlen - oldlen));
-  if (ret == NULL) {
-    return str;
+  size_t result_length = input_length + count * (new_length - old_length);
+  result_string = malloc(result_length + 1); // +1 to allocate space for null terminator
+  if (result_string == NULL) {
+    return input_string;
   }
   i = 0;
-  while (*str) {
-    if (strstr(str, orig) == str) {
-      strcpy(&ret[i], rep);
-      i += newlen;
-      str += oldlen;
+  while (*input_string) {
+    if (strstr(input_string, old_string) == input_string) {
+      strcpy(&result_string[i], new_string);
+      i += new_length;
+      input_string += old_length;
     } else {
-      ret[i++] = *str++;
+      result_string[i++] = *input_string++;
     }
   }
-  ret[i] = '\0';
-  return ret;
+  result_string[i] = '\0';
+  return result_string;
 }
 
-int split_string(char *str, char c, char ***arr) {
+int split_string(char* str, char c, char*** arr) {
   int count = 1;
   int token_len = 1;
   int i = 0;
-  char *p;
-  char *t;
+  char* p;
+  char* t;
   p = str;
   while (*p != '\0') {
     if (*p == c) {
@@ -42,14 +44,14 @@ int split_string(char *str, char c, char ***arr) {
     }
     p++;
   }
-  *arr = (char **)malloc(sizeof(char *) * count);
+  *arr = (char**)malloc(sizeof(char*) * count);
   if (*arr == NULL) {
     return 0;
   }
   p = str;
   while (*p != '\0') {
     if (*p == c) {
-      (*arr)[i] = (char *)malloc(sizeof(char) * token_len);
+      (*arr)[i] = (char*)malloc(sizeof(char) * token_len);
       if ((*arr)[i] == NULL) {
         return 0;
       }
@@ -59,7 +61,7 @@ int split_string(char *str, char c, char ***arr) {
     p++;
     token_len++;
   }
-  (*arr)[i] = (char *)malloc(sizeof(char) * token_len);
+  (*arr)[i] = (char*)malloc(sizeof(char) * token_len);
   if ((*arr)[i] == NULL) {
     return 0;
   }
@@ -80,8 +82,8 @@ int split_string(char *str, char c, char ***arr) {
   return count;
 }
 
-char *read_string(int f) {
-  char *string = malloc(sizeof(char) * 65536);
+char* read_string(int f) {
+  char* string = malloc(sizeof(char) * 65536);
   int c;
   int length = 0;
   if (!string) {
@@ -95,7 +97,7 @@ char *read_string(int f) {
   return realloc(string, sizeof(char) * length);
 }
 
-int substring(char *haystack, char *needle) {
+int substring(char* haystack, char* needle) {
   int i = 0;
   int d = 0;
   if (strlen(haystack) >= strlen(needle)) {

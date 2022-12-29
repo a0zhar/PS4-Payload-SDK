@@ -1,34 +1,36 @@
 #include "../include/strings.h"
 
-char* replace_str(char* input_string, char* old_string, char* new_string) {
-  char* result_string;
+char* replace_str(char* str, char* oldWord, char* newWord) {
+  char* resultBuf; // this buffer, will contain the final string (aka with old word replaced)
   int i, count = 0;
-  size_t new_length = strlen(new_string);
-  size_t old_length = strlen(old_string);
-  size_t input_length = strlen(input_string);
-  for (i = 0; input_string[i] != '\0'; i++) {
-    if (strstr(&input_string[i], old_string) == &input_string[i]) {
+  size_t WnewLen = strlen(newWord); // length of new word
+  size_t WoldLen = strlen(oldWord); // length of old word
+  size_t WfullLen = strlen(str);     // length of input str
+
+  for (i = 0; str[i] != '\0'; i++) {
+    if (strstr(&str[i], oldWord) == &str[i]) {
       count++;
-      i += old_length - 1;
+      i += WoldLen - 1;
     }
   }
-  size_t result_length = input_length + count * (new_length - old_length);
-  result_string = malloc(result_length + 1); // +1 to allocate space for null terminator
-  if (result_string == NULL) {
-    return input_string;
+  size_t resLen = WfullLen + count * (WnewLen - WoldLen);
+  resultBuf = malloc(resLen + 1); // +1 to allocate space for null terminator
+  memset(resultBuf, 0, resLen);
+  if (resultBuf == NULL) {
+    return str;
   }
   i = 0;
-  while (*input_string) {
-    if (strstr(input_string, old_string) == input_string) {
-      strcpy(&result_string[i], new_string);
-      i += new_length;
-      input_string += old_length;
+  while (*str) {
+    if (strstr(str, oldWord) == str) {
+      strcpy(&resultBuf[i], newWord);
+      i += WnewLen;
+      str += WoldLen;
     } else {
-      result_string[i++] = *input_string++;
+      resultBuf[i++] = *str++;
     }
   }
-  result_string[i] = '\0';
-  return result_string;
+  resultBuf[i] = '\0';
+  return resultBuf;
 }
 
 int split_string(char* str, char c, char*** arr) {
@@ -82,19 +84,20 @@ int split_string(char* str, char c, char*** arr) {
   return count;
 }
 
-char* read_string(int f) {
-  char* string = malloc(sizeof(char) * 65536);
-  int c;
-  int length = 0;
-  if (!string) {
-    return string;
+char* read_string(int fd) {
+  char* buf = malloc(65536);
+  // if allocation failed!
+  if (buf == NULL) {
+    return 0;//return
   }
-  while ((c = fgetc_pointer(f)) != -1) {
-    string[length++] = c;
-  }
-  string[length++] = '\0';
 
-  return realloc(string, sizeof(char) * length);
+  size_t length = 0;
+  for (int c = fgetc_pointer(fd); c != -1;) {
+    buf[length++] = c;
+  }
+  buf[length++] = '\0';
+
+  return realloc(buf, length);
 }
 
 int substring(char* haystack, char* needle) {

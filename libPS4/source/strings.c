@@ -2,33 +2,48 @@
 #include "libc.h"
 
 #include "strings.h"
-char *replace_str(char *str, char *orig, char *rep) {
-  char *ret;
-  int i, count = 0;
-  size_t newlen = strlen(rep);
-  size_t oldlen = strlen(orig);
-  for (i = 0; str[i] != '\0'; i++) {
-    if (strstr(&str[i], orig) == &str[i]) {
+size_t count_occurrences(char* str, char* word) {
+  size_t count = 0;
+  char* p = (char*)str;
+  while (*p != '\0') {
+    if (strstr(p, word) == p) {
       count++;
-      i += oldlen - 1;
-    }
-  }
-  ret = calloc(i + count * (newlen - oldlen) + 1, sizeof(char));
-  if (ret == NULL) {
-    return str;
-  }
-  i = 0;
-  while (*str) {
-    if (strstr(str, orig) == str) {
-      strcpy(&ret[i], rep);
-      i += newlen;
-      str += oldlen;
+      p += strlen(word);
     } else {
-      ret[i++] = *str++;
+      p++;
     }
   }
-  ret[i] = '\0';
-  return ret;
+  return count;
+}
+
+char* replace_str(char* str, char* word, char* replacement) {
+    // Allocate a buffer to store the modified string
+  size_t str_len = strlen(str);
+  size_t word_len = strlen(word);
+  size_t replacement_len = strlen(replacement);
+  size_t buffer_len = str_len + (replacement_len - word_len) * count_occurrences(str, word) + 1;
+  char* buffer = calloc(buffer_len, sizeof(char));
+  if (buffer == NULL) {
+    return (char*)str;
+  }
+
+  // Iterate through the string and replace occurrences of the word with the replacement
+  char* p = (char*)str;
+  char* q = buffer;
+  while (*p != '\0') {
+    if (strstr(p, word) == p) {
+        // Found an occurrence of the word, copy the replacement
+      strcpy(q, replacement);
+      p += word_len;
+      q += replacement_len;
+    } else {
+        // Not an occurrence of the word, copy the character
+      *q++ = *p++;
+    }
+  }
+  *q = '\0';
+
+  return buffer;
 }
 int split_string(char* str, char c, char*** arr) {
   int count = 1;

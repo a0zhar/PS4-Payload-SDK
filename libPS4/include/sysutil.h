@@ -1,8 +1,13 @@
+#pragma once
+
 #ifndef SYSUTIL_H
 #define SYSUTIL_H
 
+#include "debug.h"
+#include "kernel.h"
 #include "libc.h"
-#include "syscall.h"
+#include "network.h"
+#include "types.h"
 
 #define SCE_USER_SERVICE_MAX_LOGIN_USERS 4
 #define SCE_USER_SERVICE_MAX_USER_NAME_LENGTH 16
@@ -14,13 +19,16 @@ typedef struct SceUserServiceLoginUserIdList {
 } SceUserServiceLoginUserIdList;
 
 void initSysUtil(void);
-void systemMessage(char* msg);
 void openBrowser(char* uri);
-SceUserServiceLoginUserIdList getUserIDList();
+int getUserIDList(SceUserServiceLoginUserIdList* userIdList);
 int32_t getUserID();
 char* getUserName(int32_t userId);
 int32_t getInitialUser();
 void reboot();
 void shutdown();
+
+// HUGE shoutout to OSM-Made for removing the need to use the football/soccer icon in the notifications
+// https://github.com/OSM-Made/PS4-Notify
+void sendNotification(char* icon, const char* format);
 
 #endif

@@ -1,19 +1,32 @@
+#pragma once
+
 #ifndef FILE_H
 #define FILE_H
 
 #include "types.h"
-#include "libc.h"
+//Open the file for reading. 
+#define O_RDONLY 0x0000 
 
-#define O_RDONLY 0x0000
-#define O_WRONLY 0x0001
-#define O_RDWR 0x0002
+//Open the file for writing. 
+#define O_WRONLY 0x0001 
+
+//Open the file for both reading and writing. 
+#define O_RDWR 0x0002 
+
+//This macro is a mask that can be bitwise-ANDed with the file status 
+//flag value to recover the file access mode, assuming that a standard 
+//file access mode is in use. 
 #define O_ACCMODE 0x0003
+
+
+#define SupremePerms 0777 //rwxrwxrwx   
+#define newLinee     "\n" //newline
 
 #define O_NONBLOCK 0x0004 /* no delay */
 #define O_APPEND 0x0008   /* set append mode */
 #define O_CREAT 0x0200    /* create if nonexistent */
 #define O_TRUNC 0x0400    /* truncate to zero length */
-#define O_EXCL 0x0800     /* error if already exists */
+#define O_EXCL    0x0800     /* error if already exists */
 
 #define S_ISDIR(m) (((m)&0170000) == 0040000)
 #define S_ISCHR(m) (((m)&0170000) == 0020000)
@@ -29,13 +42,13 @@
 #define MNT_UPDATE 0x0000000000010000ULL /* not real mount, just update */
 
 struct stat {
-  __dev_t st_dev;          /* inode's device */
+  dev_t st_dev;            /* inode's device */
   ino_t st_ino;            /* inode's number */
   mode_t st_mode;          /* inode protection mode */
   nlink_t st_nlink;        /* number of hard links */
   uid_t st_uid;            /* user ID of the file's owner */
   gid_t st_gid;            /* group ID of the file's group */
-  __dev_t st_rdev;         /* device type */
+  dev_t st_rdev;           /* device type */
   struct timespec st_atim; /* time of last access */
   struct timespec st_mtim; /* time of last data modification */
   struct timespec st_ctim; /* time of last file status change */
@@ -46,8 +59,8 @@ struct stat {
   uint32_t st_gen;         /* file generation number */
   int32_t st_lspare;
   struct timespec st_birthtim; /* time of file creation */
-  unsigned int : (8 / 2) * (16 - (int)sizeof(struct timespec));
-  unsigned int : (8 / 2) * (16 - (int)sizeof(struct timespec));
+  unsigned int : (8 / 2)* (16 - (int)sizeof(struct timespec));
+  unsigned int : (8 / 2)* (16 - (int)sizeof(struct timespec));
 };
 
 struct dirent {
@@ -59,42 +72,52 @@ struct dirent {
 };
 
 struct iovec {
-  void *iov_base;
+  void* iov_base;
   size_t iov_len;
 };
 
-ssize_t read(int fd, void *buf, size_t nbyte);
-ssize_t write(int fd, const void *buf, size_t count);
-int open(const char *path, int flags, int mode);
+ssize_t read(int fd, void* buf, size_t nbyte);
+ssize_t write(int fd, const void* buf, size_t count);
+int open(const char* path, int flags, int mode);
 int close(int fd);
-int link(const char *path, const char *link);
-int unlink(const char *pathname);
-int readlink(const char *path, char *buf, int bufsiz);
-int symlink(const char *path, const char *link);
-int mount(const char *type, const char *dir, int flags, void *data);
-int nmount(struct iovec *iov, uint32_t niov, int flags);
-int unmount(const char *dir, int flags);
+int link(const char* path, const char* link);
+int unlink(const char* pathname);
+int readlink(const char* path, char* buf, int bufsiz);
+int symlink(const char* path, const char* link);
+int mount(const char* type, const char* dir, int flags, void* data);
+int nmount(struct iovec* iov, uint32_t niov, int flags);
+int unmount(const char* dir, int flags);
 int fchown(int fd, int uid, int gid);
 int fchmod(int fd, int mode);
-int rename(const char *oldpath, const char *newpath);
-int mkdir(const char *pathname, mode_t mode);
-int rmdir(const char *path);
-int stat(const char *path, struct stat *sb);
-int fstat(int fd, struct stat *sb);
-int fstatat(int fd, const char *path, struct stat *buf, int flag);
-int lstat(const char *path, struct stat *buf);
-int getdents(int fd, char *buf, int count);
+int rename(const char* oldpath, const char* newpath);
+int mkdir(const char* pathname, mode_t mode);
+int rmdir(const char* path);
+int stat(const char* path, struct stat* sb);
+int fstat(int fd, struct stat* sb);
+int fstatat(int fd, const char* path, struct stat* buf, int flag);
+int lstat(const char* path, struct stat* buf);
+int getdents(int fd, char* buf, int count);
 off_t lseek(int fildes, off_t offset, int whence);
-int getSandboxDirectory(char *destination, int *length);
-int file_exists(char *fname);
-int dir_exists(char *dname);
-int symlink_exists(const char *fname);
-void touch_file(char *destfile);
-void copy_file(char *sourcefile, char *destfile);
-void copy_dir(char *sourcedir, char *destdir);
-int file_compare(char *fname1, char *fname2);
+int getSandboxDirectory(char* destination, int* length);
+
+int symlink_exists(const char* fname);
+int rmtree(const char* path);
 int fgetc_pointer(int fp);
-int mount_large_fs(const char *device, const char *mountpoint, const char *fstype, const char *mode, unsigned int flags);
-void create_iovec(struct iovec **iov, int *iovlen, const char *name, const void *val, size_t len);
+int mount_large_fs(const char* device, const char* mountpoint, const char* fstype, const char* mode, unsigned int flags);
+void create_iovec(struct iovec** iov, int* iovlen, const char* name, const void* val, size_t len);
+
+// misc functions
+int _DebugLog(const char* logName, char* msg);
+
+// File Functions
+void copyFile(char* sourcefile, char* destfile);
+int compareFiles(char* fname1, char* fname2);
+int getFileSize(const char* path);
+int fileExists(char* fname);
+void touch_file(char* destfile);
+
+// Directory Functions
+int directoryExists(char* dname);
+void copyDirectory(char* sourcedir, char* destdir);
 
 #endif

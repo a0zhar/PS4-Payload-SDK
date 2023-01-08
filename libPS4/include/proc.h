@@ -1,10 +1,9 @@
+#pragma once
+
 #ifndef PROC_H
 #define PROC_H
 
 #include "types.h"
-#include "libc.h"
-#include "kernel.h"
-#include "syscall.h"
 
 #define CTL_KERN 1
 #define KERN_PROC 14
@@ -19,10 +18,10 @@
 #define PT_TRACE_ME 0 /* child declares it's being traced */
 #define PT_READ_I 1   /* read word in child's I space */
 #define PT_READ_D 2   /* read word in child's D space */
-/* was	PT_READ_U	3	 * read word in child's user structure */
+/* was PT_READ_U 3  * read word in child's user structure */
 #define PT_WRITE_I 4 /* write word in child's I space */
 #define PT_WRITE_D 5 /* write word in child's D space */
-/* was	PT_WRITE_U	6	 * write word in child's user structure */
+/* was PT_WRITE_U 6  * write word in child's user structure */
 #define PT_CONTINUE 7    /* continue the child */
 #define PT_KILL 8        /* kill the child process */
 #define PT_STEP 9        /* single step the child */
@@ -61,14 +60,14 @@
 struct kinfo_proc {
   int structSize;
   int layout;
-  void* args;
-  void* paddr;
-  void* addr;
-  void* tracep;
-  void* textvp;
-  void* fd;
-  void* vmspace;
-  void* wchan;
+  void *args;
+  void *paddr;
+  void *addr;
+  void *tracep;
+  void *textvp;
+  void *fd;
+  void *vmspace;
+  void *wchan;
   int pid;
   char useless[0x173];
   char name[];
@@ -76,18 +75,18 @@ struct kinfo_proc {
 
 struct ptrace_io_desc {
   int piod_op;     /* I/O operation */
-  void* piod_offs; /* child offset */
-  void* piod_addr; /* parent offset */
+  void *piod_offs; /* child offset */
+  void *piod_addr; /* parent offset */
   size_t piod_len; /* request length */
 };
 
-int findProcess(char* procName);
+int findProcess(char *procName);
 
 void procAttach(int pid);
 void procDetach(int pid);
-void procReadBytes(int pid, void* offset, void* buffer, size_t len);
-void procWriteBytes(int pid, void* offset, void* buffer, size_t len);
-void closeProcess(char* procname);
-void killProcess(char* procname);
+void procReadBytes(int pid, void *offset, void *buffer, size_t len);
+void procWriteBytes(int pid, void *offset, void *buffer, size_t len);
+void closeProcess(char *procname);
+void killProcess(char *procname);
 
 #endif

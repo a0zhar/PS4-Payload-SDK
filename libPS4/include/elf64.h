@@ -26,14 +26,18 @@
  * $FreeBSD: release/9.0.0/sys/sys/elf64.h 186667 2009-01-01 02:08:56Z obrien $
  */
 
+#pragma once
+
 #ifndef ELF64_H
 #define ELF64_H
 
+#include "types.h"
+
 #include "elf_common.h"
 
- /*
-  * ELF definitions common to all 64-bit architectures.
-  */
+/*
+ * ELF definitions common to all 64-bit architectures.
+ */
 
 typedef uint64_t Elf64_Addr;
 typedef uint16_t Elf64_Half;
@@ -83,7 +87,8 @@ typedef struct {
  */
 
 typedef struct {
-  Elf64_Word sh_name;       /* Section name (index into the section header string table). */
+  Elf64_Word sh_name;       /* Section name (index into the
+                               section header string table). */
   Elf64_Word sh_type;       /* Section type. */
   Elf64_Xword sh_flags;     /* Section flags. */
   Elf64_Addr sh_addr;       /* Address in memory image. */
@@ -126,7 +131,7 @@ typedef struct {
  * Relocation entries.
  */
 
- /* Relocations that don't need an addend field. */
+/* Relocations that don't need an addend field. */
 typedef struct {
   Elf64_Addr r_offset; /* Location to be relocated. */
   Elf64_Xword r_info;  /* Relocation type and symbol index. */
@@ -140,20 +145,24 @@ typedef struct {
 } Elf64_Rela;
 
 /* Macros for accessing the fields of r_info. */
-#define ELF64_R_SYM(info)             ((info) >> 32)
-#define ELF64_R_TYPE(info)            ((info)&0xffffffffL)
+#define ELF64_R_SYM(info) ((info) >> 32)
+#define ELF64_R_TYPE(info) ((info)&0xffffffffL)
 
 /* Macro for constructing r_info from field values. */
-#define ELF64_R_INFO(sym, type)       (((sym) << 32) + ((type)&0xffffffffL))
-#define ELF64_R_TYPE_DATA(info)       (((Elf64_Xword)(info) << 32) >> 40)
-#define ELF64_R_TYPE_ID(info)         (((Elf64_Xword)(info) << 56) >> 56)
-#define ELF64_R_TYPE_INFO(data, type) (((Elf64_Xword)(data) << 8) + (Elf64_Xword)(type))
+#define ELF64_R_INFO(sym, type) (((sym) << 32) + ((type)&0xffffffffL))
 
-/*Note entry header*/
+#define ELF64_R_TYPE_DATA(info) (((Elf64_Xword)(info) << 32) >> 40)
+#define ELF64_R_TYPE_ID(info) (((Elf64_Xword)(info) << 56) >> 56)
+#define ELF64_R_TYPE_INFO(data, type) \
+  (((Elf64_Xword)(data) << 8) + (Elf64_Xword)(type))
+
+/*
+ * Note entry header
+ */
 typedef Elf_Note Elf64_Nhdr;
 
 /*
- *	Move entry
+ * Move entry
  */
 typedef struct {
   Elf64_Lword m_value;   /* symbol value */
@@ -163,11 +172,13 @@ typedef struct {
   Elf64_Half m_stride;   /* stride info */
 } Elf64_Move;
 
-#define ELF64_M_SYM(info)       ((info) >> 8)
-#define ELF64_M_SIZE(info)      ((unsigned char)(info))
+#define ELF64_M_SYM(info) ((info) >> 8)
+#define ELF64_M_SIZE(info) ((unsigned char)(info))
 #define ELF64_M_INFO(sym, size) (((sym) << 8) + (unsigned char)(size))
 
-/* Hardware/Software capabilities entry */
+/*
+ * Hardware/Software capabilities entry
+ */
 typedef struct {
   Elf64_Xword c_tag; /* how to interpret value */
   union {
@@ -176,7 +187,10 @@ typedef struct {
   } c_un;
 } Elf64_Cap;
 
-/* Symbol table entries. */
+/*
+ * Symbol table entries.
+ */
+
 typedef struct {
   Elf64_Word st_name;     /* String table index of name. */
   unsigned char st_info;  /* Type and binding information. */
@@ -187,14 +201,14 @@ typedef struct {
 } Elf64_Sym;
 
 /* Macros for accessing the fields of st_info. */
-#define ELF64_ST_BIND(info)       ((info) >> 4)
-#define ELF64_ST_TYPE(info)       ((info)&0xf)
+#define ELF64_ST_BIND(info) ((info) >> 4)
+#define ELF64_ST_TYPE(info) ((info)&0xf)
 
 /* Macro for constructing st_info from field values. */
 #define ELF64_ST_INFO(bind, type) (((bind) << 4) + ((type)&0xf))
 
 /* Macro for accessing the fields of st_other. */
-#define ELF64_ST_VISIBILITY(oth)  ((oth)&0x3)
+#define ELF64_ST_VISIBILITY(oth) ((oth)&0x3)
 
 /* Structures used by Sun & GNU-style symbol versioning. */
 typedef struct {

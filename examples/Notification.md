@@ -2,9 +2,9 @@
 ## Before doing anything, you need to run update.sh before you can use the library. The update.sh file will build the library and then set the required global path variable. 
 
 ```C
-// include the ps4.h header, this contains (include statements to all other relevant headers)
-#include "ps4.h"
-#include "icons.h"
+#include "ps4.h"   // Include the ps4.h header, which includes all other relevant headers.
+#include "icons.h" // Include names for dumped notification icons (ref: https://github.com/OSM-Made/PS4-Notify)
+
 int PrepareEnvironment() {
   initKernel();
   initLibc();
@@ -59,8 +59,6 @@ int _main(struct thread* td) {
 #define texIconParty "cxml://psnotification/tex_icon_party"
 #define texIconShareplay "cxml://psnotification/tex_icon_shareplay"
 #define texIconBroadcast "cxml://psnotification/tex_icon_broadcast"
-
-
 #define tex_icon_psnow_toast "cxml://psnotification/tex_icon_psnow_toast"
 #define tex_audio_device_headphone "cxml://psnotification/tex_audio_device_headphone"
 #define tex_audio_device_headset "cxml://psnotification/tex_audio_device_headset"

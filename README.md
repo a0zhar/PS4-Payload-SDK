@@ -6,6 +6,9 @@
 
 #### Changelog:
 ```
+UPCOMING v0.2b 
+ - Timestamp function that returns time in "[HH:MM:SS]" format.
+
 Update v0.1 (Sunday, January 8, 2023)
  - A new function has been added! _DebugLog(): logs information into the file.
  - Renamed copy_dir and file_compare to copyDirectory and compareFiles.

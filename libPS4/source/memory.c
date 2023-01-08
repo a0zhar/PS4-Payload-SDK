@@ -1,6 +1,6 @@
-#include "../include/syscall.h"
+#include "syscall.h"
 
-#include "../include/memory.h"
+#include "memory.h"
 
 SYSCALL(mmap, 477);
 SYSCALL(munmap, 73);

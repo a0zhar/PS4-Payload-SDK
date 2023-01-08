@@ -1,5 +1,5 @@
-#include "../include/syscall.h"
+#include "syscall.h"
 
-#include "../include/registry.h"
+#include "registry.h"
 
 SYSCALL(registryCommand, 532);

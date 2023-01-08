@@ -1,17 +1,25 @@
-#include "../include/kernel.h"
-#include "../include/module.h"
-#include "../include/memory.h"
+#include "kernel.h"
+#include "memory.h"
+#include "module.h"
 
-#include "../include/jit.h"
+#include "jit.h"
+
+int libJIT;
 
 int (*sceKernelJitCreateSharedMemory)(int flags, size_t size, int protection, int *destinationHandle);
 int (*sceKernelJitCreateAliasOfSharedMemory)(int handle, int protection, int *destinationHandle);
 int (*sceKernelJitMapSharedMemory)(int handle, int protection, void **destination);
 
 void initJIT(void) {
-  RESOLVE(libKernelHandle, sceKernelJitCreateSharedMemory);
-  RESOLVE(libKernelHandle, sceKernelJitCreateAliasOfSharedMemory);
-  RESOLVE(libKernelHandle, sceKernelJitMapSharedMemory);
+  if (libJIT) {
+    return;
+  }
+
+  getFunctionAddressByName(libKernelHandle, "sceKernelJitCreateSharedMemory", &sceKernelJitCreateSharedMemory);
+  getFunctionAddressByName(libKernelHandle, "sceKernelJitCreateAliasOfSharedMemory", &sceKernelJitCreateAliasOfSharedMemory);
+  getFunctionAddressByName(libKernelHandle, "sceKernelJitMapSharedMemory", &sceKernelJitMapSharedMemory);
+
+  libJIT = 1;
 }
 
 void allocateJIT(size_t size, void **executableAddress, void **writableAddress) {

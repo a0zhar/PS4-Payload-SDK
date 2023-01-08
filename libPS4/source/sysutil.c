@@ -1,108 +1,109 @@
-#include "../include/kernel.h"
-#include "../include/module.h"
-#include "../include/sysutil.h"
+#include "kernel.h"
+#include "libc.h"
+#include "module.h"
+#include "syscall.h"
 
-int (*sceSysUtilSendSystemNotificationWithText)(int messageType, char *message);
-int (*sceSystemServiceLaunchWebBrowser)(const char *uri, void *);
-int (*sceUserServiceInitialize)(void *);
-int (*sceUserServiceGetLoginUserIdList)(SceUserServiceLoginUserIdList *);
-int (*sceUserServiceGetUserName)(int32_t userId, char *userName, const size_t size);
-int (*sceUserServiceGetInitialUser)(int32_t *);
+#include "sysutil.h"
+
+int sysUtilHandle;
+int libSceSystemService;
+int libSceUserService;
+
+int (*sceSysUtilSendSystemNotificationWithText)(int messageType, char* message);
+int (*sceSystemServiceLaunchWebBrowser)(const char* uri, void*);
+int (*sceUserServiceInitialize)(void*);
+int (*sceUserServiceGetLoginUserIdList)(SceUserServiceLoginUserIdList*);
+int (*sceUserServiceGetUserName)(int32_t userId, char* userName, const size_t size);
+int (*sceUserServiceGetInitialUser)(int32_t*);
 int (*sceUserServiceTerminate)();
 int (*sceKernelReboot)();
 
 void initSysUtil(void) {
-  int sysUtilHandle = sceKernelLoadStartModule("/system/common/lib/libSceSysUtil.sprx", 0, NULL, 0, 0, 0);
-  int libSceSystemService = sceKernelLoadStartModule("/system/common/lib/libSceSystemService.sprx", 0, NULL, 0, 0, 0);
-  RESOLVE(sysUtilHandle, sceSysUtilSendSystemNotificationWithText);
-  RESOLVE(libSceSystemService, sceSystemServiceLaunchWebBrowser);
+  if (!sysUtilHandle) {
+    sysUtilHandle = sceKernelLoadStartModule("/system/common/lib/libSceSysUtil.sprx", 0, 0, 0, NULL, NULL);
+
+    getFunctionAddressByName(sysUtilHandle, "sceSysUtilSendSystemNotificationWithText", &sceSysUtilSendSystemNotificationWithText);
+  }
+
+  if (!libSceSystemService) {
+    libSceSystemService = sceKernelLoadStartModule(
+      "/system/common/lib/libSceSystemService.sprx", 0, 0, 0, NULL, NULL
+    );
+    getFunctionAddressByName(
+      libSceSystemService, "sceSystemServiceLaunchWebBrowser", &sceSystemServiceLaunchWebBrowser
+    );
+  }
 }
 
-void systemMessage(char *msg) {
-  char buffer[512];
-  sprintf(buffer, "%s", msg);
-  sceSysUtilSendSystemNotificationWithText(0xDE, buffer);
+void initUserService(void) {
+  if (libSceUserService) return;
+
+
+  libSceUserService = sceKernelLoadStartModule(
+    "/system/common/lib/libSceUserService.sprx", 0, 0, 0, NULL, NULL
+  );
+
+  getFunctionAddressByName(libSceUserService, "sceUserServiceInitialize", &sceUserServiceInitialize);
+  getFunctionAddressByName(libSceUserService, "sceUserServiceGetInitialUser", &sceUserServiceGetInitialUser);
+  getFunctionAddressByName(libSceUserService, "sceUserServiceGetLoginUserIdList", &sceUserServiceGetLoginUserIdList);
+  getFunctionAddressByName(libSceUserService, "sceUserServiceGetUserName", &sceUserServiceGetUserName);
+  getFunctionAddressByName(libSceUserService, "sceUserServiceTerminate", &sceUserServiceTerminate);
 }
 
-void openBrowser(char *uri) {
+void openBrowser(char* uri) {
   sceSystemServiceLaunchWebBrowser(uri, NULL);
 }
 
-SceUserServiceLoginUserIdList getUserIDList() {
-  int ret;
-  SceUserServiceLoginUserIdList userIdList;
-  int libSceUserService = sceKernelLoadStartModule("/system/common/lib/libSceUserService.sprx", 0, NULL, 0, 0, 0);
-  RESOLVE(libSceUserService, sceUserServiceInitialize);
-  RESOLVE(libSceUserService, sceUserServiceGetLoginUserIdList);
-  RESOLVE(libSceUserService, sceUserServiceTerminate);
-  ret = sceUserServiceInitialize(NULL);
-  if (ret == 0) {
-    ret = sceUserServiceGetLoginUserIdList(&userIdList);
-    if (ret == 0) {
+int getUserIDList(SceUserServiceLoginUserIdList* userIdList) {
+  initUserService();
+  if (sceUserServiceInitialize(NULL) == 0) {
+    if (sceUserServiceGetLoginUserIdList(userIdList) == 0) {
       sceUserServiceTerminate();
+      return 0;
     }
   }
-  return userIdList;
+  return -1;
 }
-
 int32_t getUserID() {
-  int ret;
   SceUserServiceLoginUserIdList userIdList;
-  int libSceUserService = sceKernelLoadStartModule("/system/common/lib/libSceUserService.sprx", 0, NULL, 0, 0, 0);
-  RESOLVE(libSceUserService, sceUserServiceInitialize);
-  RESOLVE(libSceUserService, sceUserServiceGetLoginUserIdList);
-  RESOLVE(libSceUserService, sceUserServiceTerminate);
-  ret = sceUserServiceInitialize(NULL);
-  if (ret == 0) {
-    ret = sceUserServiceGetLoginUserIdList(&userIdList);
-    if (ret == 0) {
-      for (int i = 0; i < 1; i++) {
-        if (userIdList.userId[i] != -1) {
-          sceUserServiceTerminate();
-          return userIdList.userId[i];
-        }
-      }
+  getUserIDList(&userIdList);
+  for (int i = 0; i < 1; i++) {
+    if (userIdList.userId[i] != -1) {
+      return userIdList.userId[i];
     }
   }
   return -1;
 }
 
-char *getUserName(int32_t userId) {
-  int ret;
-  char *retval = malloc(SCE_USER_SERVICE_MAX_USER_NAME_LENGTH);
-  int libSceUserService = sceKernelLoadStartModule("/system/common/lib/libSceUserService.sprx", 0, NULL, 0, 0, 0);
-  RESOLVE(libSceUserService, sceUserServiceInitialize);
-  RESOLVE(libSceUserService, sceUserServiceGetUserName);
-  RESOLVE(libSceUserService, sceUserServiceTerminate);
-  ret = sceUserServiceInitialize(NULL);
-  if (ret == 0) {
-    char username[SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1];
-    ret = sceUserServiceGetUserName(userId, username, sizeof(username));
-    if (ret == 0) {
-      strcpy(retval, username);
+char* getUserName(int32_t userId) {
+  char username[SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1];
+  memset(username, 0, sizeof(username));
+  initUserService();
+  if (sceUserServiceInitialize(NULL) == 0) {
+    if (sceUserServiceGetUserName(userId, username, sizeof(username)) == 0) {
       sceUserServiceTerminate();
+      char* retval = calloc(1, SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1);
+      if (retval == NULL) {
+        return NULL;
+      }
+      strcpy(retval, username);
       return retval;
     }
   }
   return NULL;
 }
 
+
 int32_t getInitialUser() {
-  int ret;
   int32_t userId;
-  int libSceUserService = sceKernelLoadStartModule("/system/common/lib/libSceUserService.sprx", 0, NULL, 0, 0, 0);
-  RESOLVE(libSceUserService, sceUserServiceGetInitialUser);
-  RESOLVE(libSceUserService, sceUserServiceInitialize);
-  RESOLVE(libSceUserService, sceUserServiceTerminate);
-  ret = sceUserServiceInitialize(NULL);
-  if (ret == 0) {
-    ret = sceUserServiceGetInitialUser(&userId);
-    if (ret == 0) {
+  initUserService();
+  if (sceUserServiceInitialize(NULL) == 0) {
+    if (sceUserServiceGetInitialUser(&userId) == 0) {
       sceUserServiceTerminate();
       return userId;
     }
   }
-  return ret;
+  return -1;
 }
 
 void shutdown() {
@@ -113,7 +114,23 @@ void shutdown() {
 }
 
 void reboot() {
-  int libkernel = sceKernelLoadStartModule("/system/common/lib/libkernel.sprx", 0, NULL, 0, 0, 0);
-  RESOLVE(libkernel, sceKernelReboot);
+  getFunctionAddressByName(
+    sceKernelLoadStartModule("/system/common/lib/libkernel.sprx", NULL, NULL, NULL, NULL, NULL),
+    "sceKernelReboot",
+    &sceKernelReboot
+  );
   sceKernelReboot();
+}
+
+void sendNotification(char* icon, const char* format) {
+  SceNotificationRequest noti_buffer = {
+    .type = 0,
+    .unk3 = 0,
+    .use_icon_image_uri = 1,
+    .target_id = -1
+  };
+
+  strcpy(noti_buffer.uri, icon == 0 ? "cxml://psnotification/tex_morpheus_trophy_gold" : icon);
+  strcpy(noti_buffer.message, format);
+  sceKernelSendNotificationRequest(0, &noti_buffer, sizeof(noti_buffer), 0);
 }

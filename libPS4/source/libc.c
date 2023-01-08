@@ -1,7 +1,10 @@
-#include "../include/kernel.h"
-#include "../include/module.h"
+#include "file.h"
+#include "kernel.h"
+#include "module.h"
 
-#include "../include/libc.h"
+#include "libc.h"
+
+int libc;
 
 void* (*malloc)(size_t size);
 void (*free)(void* ptr);
@@ -11,8 +14,11 @@ void* (*memalign)(size_t boundary, size_t size);
 void* (*memset)(void* destination, int value, size_t num);
 void* (*memcpy)(void* destination, const void* source, size_t num);
 int (*memcmp)(const void* s1, const void* s2, size_t n);
+void* (*memmove)(void* dst, const void* src, size_t len);
+errno_t(*memmove_s)(void* dest, rsize_t destsz, const void* src, rsize_t count);
 char* (*strcpy)(char* destination, const char* source);
 char* (*strncpy)(char* destination, const char* source, size_t num);
+errno_t* (*strncpy_s)(char* restrict dest, rsize_t destsz, const char* restrict src, rsize_t count);
 char* (*strcat)(char* dest, const char* src);
 char* (*strncat)(char* dest, const char* src, size_t n);
 size_t(*strlen)(const char* s);
@@ -20,20 +26,26 @@ int (*strcmp)(const char* s1, const char* s2);
 int (*strncmp)(const char* s1, const char* s2, size_t n);
 int (*sprintf)(char* str, const char* format, ...);
 int (*snprintf)(char* str, size_t size, const char* format, ...);
+int (*snprintf_s)(char* restrict buffer, rsize_t bufsz, const char* restrict format, ...);
 int (*sscanf)(const char* str, const char* format, ...);
+int (*strtol)(const char* s1, char** s2, int base);
+char* (*strtok)(char* str, const char* delimiters);
 char* (*strchr)(const char* s, int c);
 char* (*strrchr)(const char* s, int c);
 char* (*strstr)(char* str1, char* str2);
 char* (*strdup)(const char* s);
+char* (*strtok)(char* str, const char* sep);
 char* (*index)(const char* s, int c);
 char* (*rindex)(const char* s, int c);
 int (*isdigit)(int c);
 int (*atoi)(const char* s);
+double (*atof)(const char* s);
 size_t(*strlcpy)(char* dst, const char* src, size_t size);
 char* (*strerror)(int errnum);
 void* (*_Getpctype)();
 unsigned long (*_Stoul)(const char*, char**, int);
 void (*bcopy)(const void* s1, void* s2, size_t n);
+double (*ceil)(double x);
 
 void (*srand)(unsigned int seed);
 int (*rand)(void);
@@ -67,9 +79,28 @@ long int (*ftell)(FILE* stream);
 int (*fclose)(FILE* stream);
 int (*fprintf)(FILE* stream, const char* format, ...);
 
-void initLibc(void) {
-  int libc = sceKernelLoadStartModule("libSceLibcInternal.sprx", 0, NULL, 0, 0, 0);
+int memset_s(void* dest, rsize_t destsz, int ch, rsize_t count) {
+  if ((dest == NULL) || (destsz > RSIZE_MAX) || (count > RSIZE_MAX) || (count > destsz)) {
+    if ((dest != NULL) && !(destsz > RSIZE_MAX)) {
+      for (rsize_t i = 0; i < destsz; ++i) {
+        ((volatile unsigned char*)dest)[i] = ch;
+      }
+    }
+    return 1;
+  } else {
+    for (rsize_t i = 0; i < count; ++i) {
+      ((volatile unsigned char*)dest)[i] = ch;
+    }
+    return 0;
+  }
+}
 
+void initLibc(void) {
+  if (libc) {
+    return;
+  }
+
+  libc = sceKernelLoadStartModule("libSceLibcInternal.sprx", 0, 0, 0, NULL, NULL);
   getFunctionAddressByName(libc, "malloc", &malloc);
   getFunctionAddressByName(libc, "free", &free);
   getFunctionAddressByName(libc, "calloc", &calloc);
@@ -78,8 +109,12 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "memset", &memset);
   getFunctionAddressByName(libc, "memcpy", &memcpy);
   getFunctionAddressByName(libc, "memcmp", &memcmp);
+  getFunctionAddressByName(libc, "memmove", &memmove);
+  getFunctionAddressByName(libc, "memmove_s", &memmove_s);
+
   getFunctionAddressByName(libc, "strcpy", &strcpy);
   getFunctionAddressByName(libc, "strncpy", &strncpy);
+  getFunctionAddressByName(libc, "strncpy_s", &strncpy_s);
   getFunctionAddressByName(libc, "strcat", &strcat);
   getFunctionAddressByName(libc, "strncat", &strncat);
   getFunctionAddressByName(libc, "strlen", &strlen);
@@ -87,20 +122,28 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "strncmp", &strncmp);
   getFunctionAddressByName(libc, "sprintf", &sprintf);
   getFunctionAddressByName(libc, "snprintf", &snprintf);
+  getFunctionAddressByName(libc, "snprintf_s", &snprintf_s);
   getFunctionAddressByName(libc, "sscanf", &sscanf);
+  getFunctionAddressByName(libc, "strtol", &strtol);
+  getFunctionAddressByName(libc, "strtok", &strtok);
   getFunctionAddressByName(libc, "strchr", &strchr);
   getFunctionAddressByName(libc, "strrchr", &strrchr);
   getFunctionAddressByName(libc, "strstr", &strstr);
   getFunctionAddressByName(libc, "strdup", &strdup);
+  getFunctionAddressByName(libc, "strtok", &strtok);
+
   getFunctionAddressByName(libc, "index", &index);
   getFunctionAddressByName(libc, "rindex", &rindex);
   getFunctionAddressByName(libc, "isdigit", &isdigit);
   getFunctionAddressByName(libc, "atoi", &atoi);
+  getFunctionAddressByName(libc, "atof", &atof);
   getFunctionAddressByName(libc, "strlcpy", &strlcpy);
   getFunctionAddressByName(libc, "strerror", &strerror);
+
   getFunctionAddressByName(libc, "_Getpctype", &_Getpctype);
   getFunctionAddressByName(libc, "_Stoul", &_Stoul);
   getFunctionAddressByName(libc, "bcopy", &bcopy);
+  getFunctionAddressByName(libc, "ceil", &ceil);
 
   getFunctionAddressByName(libc, "srand", &srand);
   getFunctionAddressByName(libc, "rand", &rand);
@@ -124,6 +167,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "rewinddir", &rewinddir);
   getFunctionAddressByName(libc, "closedir", &closedir);
   getFunctionAddressByName(libc, "dirfd", &dirfd);
+
   getFunctionAddressByName(libc, "getprogname", &getprogname);
 
   getFunctionAddressByName(libc, "fopen", &fopen);
@@ -134,72 +178,4 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "fclose", &fclose);
   getFunctionAddressByName(libc, "fprintf", &fprintf);
 
-
-
-
-  /*
-  RESOLVE(libc, malloc);
-  RESOLVE(libc, free);
-  RESOLVE(libc, calloc);
-  RESOLVE(libc, realloc);
-  RESOLVE(libc, memalign);
-  RESOLVE(libc, memset);
-  RESOLVE(libc, memcpy);
-  RESOLVE(libc, memcmp);
-  RESOLVE(libc, strcpy);
-  RESOLVE(libc, strncpy);
-  RESOLVE(libc, strcat);
-  RESOLVE(libc, strncat);
-  RESOLVE(libc, strlen);
-  RESOLVE(libc, strcmp);
-  RESOLVE(libc, strncmp);
-  RESOLVE(libc, sprintf);
-  RESOLVE(libc, snprintf);
-  RESOLVE(libc, sscanf);
-  RESOLVE(libc, strchr);
-  RESOLVE(libc, strrchr);
-  RESOLVE(libc, strstr);
-  RESOLVE(libc, strdup);
-  RESOLVE(libc, index);
-  RESOLVE(libc, rindex);
-  RESOLVE(libc, isdigit);
-  RESOLVE(libc, atoi);
-  RESOLVE(libc, strlcpy);
-  RESOLVE(libc, strerror);
-  RESOLVE(libc, _Getpctype);
-  RESOLVE(libc, _Stoul);
-  RESOLVE(libc, bcopy);
-
-  RESOLVE(libc, srand);
-  RESOLVE(libc, rand);
-
-  RESOLVE(libc, asctime);
-  RESOLVE(libc, asctime_r);
-  RESOLVE(libc, ctime);
-  RESOLVE(libc, ctime_r);
-  RESOLVE(libc, time);
-  RESOLVE(libc, gmtime);
-  RESOLVE(libc, gmtime_s);
-  RESOLVE(libc, localtime);
-  RESOLVE(libc, localtime_r);
-  RESOLVE(libc, mktime);
-
-  RESOLVE(libc, opendir);
-  RESOLVE(libc, readdir);
-  RESOLVE(libc, readdir_r);
-  RESOLVE(libc, telldir);
-  RESOLVE(libc, seekdir);
-  RESOLVE(libc, rewinddir);
-  RESOLVE(libc, closedir);
-  RESOLVE(libc, dirfd);
-
-  RESOLVE(libc, getprogname);
-
-  RESOLVE(libc, fopen);
-  RESOLVE(libc, fread);
-  RESOLVE(libc, fwrite);
-  RESOLVE(libc, fseek);
-  RESOLVE(libc, ftell);
-  RESOLVE(libc, fclose);
-  RESOLVE(libc, fprintf);*/
 }

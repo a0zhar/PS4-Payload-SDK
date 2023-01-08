@@ -1,6 +1,7 @@
-#include "../include/module.h"
-#include "../include/syscall.h"
-#include "../include/kernel.h"
+#include "module.h"
+#include "syscall.h"
+
+#include "kernel.h"
 
 int libKernelHandle;
 
@@ -50,19 +51,30 @@ int (*setgid)(int gid);
 int (*setreuid)(int ruid, int euid);
 int (*setregid)(int rgid, int egid);
 
+int (*sceKernelSendNotificationRequest)(int device, SceNotificationRequest* req, size_t size, int blocking);
+const char* (*sceKernelGetFsSandboxRandomWord)();
+int (*sceKernelGetSystemSwVersion)(SceFwInfo* fw_info);
+
+uint32_t(*sceKernelGetCpuTemperature)(uint32_t*);
+
 SYSCALL(kill, 37);
 SYSCALL(ioctl, 54);
 
 SYSCALL(kexec, 11);
 
 void initKernel(void) {
+  if (libKernelHandle) {
+    return;
+  }
+
   __error = NULL;
 
   if (loadModule("libkernel.sprx", &libKernelHandle)) {
     if (loadModule("libkernel_web.sprx", &libKernelHandle)) {
-        loadModule("libkernel_sys.sprx", &libKernelHandle);
+      loadModule("libkernel_sys.sprx", &libKernelHandle);
     }
   }
+
   getFunctionAddressByName(libKernelHandle, "__stack_chk_guard", &__stack_chk_guard);
   getFunctionAddressByName(libKernelHandle, "__stack_chk_fail", &__stack_chk_fail);
   getFunctionAddressByName(libKernelHandle, "__error", &__error);
@@ -108,51 +120,10 @@ void initKernel(void) {
   getFunctionAddressByName(libKernelHandle, "setgid", &setgid);
   getFunctionAddressByName(libKernelHandle, "setreuid", &setreuid);
   getFunctionAddressByName(libKernelHandle, "setregid", &setregid);
-  /*
-   RESOLVE(libKernelHandle, __stack_chk_guard);
-   RESOLVE(libKernelHandle, __stack_chk_fail);
-   RESOLVE(libKernelHandle, __error);
 
-   RESOLVE(libKernelHandle, sceKernelError);
+  getFunctionAddressByName(libKernelHandle, "sceKernelSendNotificationRequest", &sceKernelSendNotificationRequest);
+  getFunctionAddressByName(libKernelHandle, "sceKernelGetFsSandboxRandomWord", &sceKernelGetFsSandboxRandomWord);
+  getFunctionAddressByName(libKernelHandle, "sceKernelGetSystemSwVersion", &sceKernelGetSystemSwVersion);
 
-   RESOLVE(libKernelHandle, sceKernelLoadStartModule);
-
-   RESOLVE(libKernelHandle, sceKernelAllocateDirectMemory);
-   RESOLVE(libKernelHandle, sceKernelMapDirectMemory);
-   RESOLVE(libKernelHandle, sceKernelGetDirectMemorySize);
-
-   RESOLVE(libKernelHandle, sceKernelStat);
-   RESOLVE(libKernelHandle, sceKernelOpen);
-   RESOLVE(libKernelHandle, sceKernelRead);
-   RESOLVE(libKernelHandle, sceKernelLseek);
-   RESOLVE(libKernelHandle, sceKernelClose);
-
-   RESOLVE(libKernelHandle, sceKernelSleep);
-   RESOLVE(libKernelHandle, sceKernelUsleep);
-   RESOLVE(libKernelHandle, sceKernelGettimeofday);
-   RESOLVE(libKernelHandle, sceKernelGetProcessTime);
-   RESOLVE(libKernelHandle, sceKernelGetCurrentCpu);
-
-   RESOLVE(libKernelHandle, sysctl);
-   RESOLVE(libKernelHandle, sysctlbyname);
-   RESOLVE(libKernelHandle, sysarch);
-   RESOLVE(libKernelHandle, execve);
-
-   RESOLVE(libKernelHandle, pthread_self);
-   RESOLVE(libKernelHandle, pthread_setaffinity_np);
-
-   RESOLVE(libKernelHandle, sceKernelCreateEqueue);
-   RESOLVE(libKernelHandle, sceKernelDeleteEqueue);
-   RESOLVE(libKernelHandle, sceKernelAddUserEvent);
-   RESOLVE(libKernelHandle, sceKernelAddReadEvent);
-
-   RESOLVE(libKernelHandle, getuid);
-   RESOLVE(libKernelHandle, getgid);
-   RESOLVE(libKernelHandle, getpid);
-
-   RESOLVE(libKernelHandle, setuid);
-   RESOLVE(libKernelHandle, setgid);
-   RESOLVE(libKernelHandle, setreuid);
-   RESOLVE(libKernelHandle, setregid);
-   */
+  getFunctionAddressByName(libKernelHandle, "sceKernelGetCpuTemperature", &sceKernelGetCpuTemperature);
 }

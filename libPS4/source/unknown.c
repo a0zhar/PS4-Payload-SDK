@@ -1,6 +1,6 @@
-#include "../include/syscall.h"
+#include "syscall.h"
 
-#include "../include/unknown.h"
+#include "unknown.h"
 
 SYSCALL(unknownResourceCreate, 574);
 SYSCALL(unknownResourceDestroy, 575);

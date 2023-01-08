@@ -18,3 +18,6 @@ Update v0.0 (Friday, January 6, 2023)
  - Rewrote the function file_compare();
  - Refactored the getUserID() function.
 ```
+
+Credits:
+https://github.com/Scene-Collective/ps4-payload-sdk

@@ -17,7 +17,7 @@ int _main(struct thread* td) {
   UNUSED(td);
   PrepareEnvironment();
  
-  sendNotification(texDefaultIconTrophy, "Creating The System Update Blocking Files");
+  sendNotification(texDefaultIconTrophy, "Hello World");
   
   return 0;
 }

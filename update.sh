@@ -29,9 +29,9 @@ cp -r "$src_dir" "$dest_dir"
 cp update.sh "$dest_dir/update.sh"
 
 # Clear path from .bashrc if it's there
-#sed -i "s/^\s*export PS4SDK=.*//gm" /etc/profile
+sed -i "s/^\s*export PS4SDK=.*//gm" /etc/profile
 
 # Add to paths
 #echo "export PS4SDK=$dest_dir" | tee -a /etc/profile
-#export PS4SDK="$dest_dir"
+export PS4SDK="$dest_dir"
 echo "done"

@@ -1,7 +1,7 @@
 # PS4_SDK 
 **An open source SDK for writing payloads for the PlayStation 4.
-Supports firmware 3.50 - 9.00.**
-
+<br> Supports firmware 3.50 - 9.00.**
+<br><br>
 
 
 #### Changelog:

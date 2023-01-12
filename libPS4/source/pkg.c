@@ -11,9 +11,8 @@
 #define EOF '\00'
 
 // Helper functions.
-static inline uint16_t bswap_16(uint16_t val) {
-  return ((val & (uint16_t)0x00ffU) << 8) | ((val & (uint16_t)0xff00U) >> 8);
-}
+/* OLD
+static inline uint16_t bswap_16(uint16_t val) {return ((val & (uint16_t)0x00ffU) << 8) | ((val & (uint16_t)0xff00U) >> 8);}
 
 static inline uint32_t bswap_32(uint32_t val) {
   return
@@ -21,6 +20,21 @@ static inline uint32_t bswap_32(uint32_t val) {
     ((val & (uint32_t)0x0000ff00UL) << 8) |
     ((val & (uint32_t)0x00ff0000UL) >> 8) |
     ((val & (uint32_t)0xff000000UL) >> 24);
+}*/
+
+//I removed the unnecessary typecasts and made the code more readable.
+
+static inline uint16_t bswap_16(uint16_t val) {
+    return ((val & 0x00ff) << 8) | ((val & 0xff00) >> 8);
+}
+
+static inline uint32_t bswap_32(uint32_t val) {
+    return (
+      ((val & 0x000000ff) << 24) |
+      ((val & 0x0000ff00) << 8)  | 
+      ((val & 0x00ff0000) >> 8)  | 
+      ((val & 0xff000000) >> 24)
+    );
 }
 
 int isfpkg(char* pkgfn) {
@@ -92,99 +106,37 @@ static char* get_entry_name_by_type(uint32_t type) {
     free(entry_name);
     entry_name = NULL;
     switch (type) {
-    case 0x0400:
-      entry_name = "license.dat";
-      break;
-    case 0x0401:
-      entry_name = "license.info";
-      break;
-    case 0x0402:
-      entry_name = "nptitle.dat";
-      break;
-    case 0x0403:
-      entry_name = "npbind.dat";
-      break;
-    case 0x0404:
-      entry_name = "selfinfo.dat";
-      break;
-    case 0x0406:
-      entry_name = "imageinfo.dat";
-      break;
-    case 0x0407:
-      entry_name = "target-deltainfo.dat";
-      break;
-    case 0x0408:
-      entry_name = "origin-deltainfo.dat";
-      break;
-    case 0x0409:
-      entry_name = "psreserved.dat";
-      break;
-    case 0x1000:
-      entry_name = "param.sfo";
-      break;
-    case 0x1001:
-      entry_name = "playgo-chunk.dat";
-      break;
-    case 0x1002:
-      entry_name = "playgo-chunk.sha";
-      break;
-    case 0x1003:
-      entry_name = "playgo-manifest.xml";
-      break;
-    case 0x1004:
-      entry_name = "pronunciation.xml";
-      break;
-    case 0x1005:
-      entry_name = "pronunciation.sig";
-      break;
-    case 0x1006:
-      entry_name = "pic1.png";
-      break;
-    case 0x1007:
-      entry_name = "pubtoolinfo.dat";
-      break;
-    case 0x1008:
-      entry_name = "app/playgo-chunk.dat";
-      break;
-    case 0x1009:
-      entry_name = "app/playgo-chunk.sha";
-      break;
-    case 0x100A:
-      entry_name = "app/playgo-manifest.xml";
-      break;
-    case 0x100B:
-      entry_name = "shareparam.json";
-      break;
-    case 0x100C:
-      entry_name = "shareoverlayimage.png";
-      break;
-    case 0x100D:
-      entry_name = "save_data.png";
-      break;
-    case 0x100E:
-      entry_name = "shareprivacyguardimage.png";
-      break;
-    case 0x1200:
-      entry_name = "icon0.png";
-      break;
-    case 0x1220:
-      entry_name = "pic0.png";
-      break;
-    case 0x1240:
-      entry_name = "snd0.at9";
-      break;
-    case 0x1260:
-      entry_name = "changeinfo/changeinfo.xml";
-      break;
-    case 0x1280:
-      entry_name = "icon0.dds";
-      break;
-    case 0x12A0:
-      entry_name = "pic0.dds";
-      break;
-    case 0x12C0:
-      entry_name = "pic1.dds";
-      break;
+    case 0x0400:entry_name = "license.dat";break;
+    case 0x0401:entry_name = "license.info";break;
+    case 0x0402:entry_name = "nptitle.dat";break;
+    case 0x0403:entry_name = "npbind.dat";break;
+    case 0x0404:entry_name = "selfinfo.dat";break;
+    case 0x0406:entry_name = "imageinfo.dat";break;
+    case 0x0407:entry_name = "target-deltainfo.dat";break;
+    case 0x0408:entry_name = "origin-deltainfo.dat";break;
+    case 0x0409:entry_name = "psreserved.dat";break;
+    case 0x1000:entry_name = "param.sfo";break;
+    case 0x1001:entry_name = "playgo-chunk.dat";break;
+    case 0x1002:entry_name = "playgo-chunk.sha";break;
+    case 0x1003:entry_name = "playgo-manifest.xml";break;
+    case 0x1004:entry_name = "pronunciation.xml";break;
+    case 0x1005:entry_name = "pronunciation.sig";break;
+    case 0x1006:entry_name = "pic1.png";break;
+    case 0x1007:entry_name = "pubtoolinfo.dat";break;
+    case 0x1008:entry_name = "app/playgo-chunk.dat";break;
+    case 0x1009:entry_name = "app/playgo-chunk.sha";break;
+    case 0x100A:entry_name = "app/playgo-manifest.xml";break;
+    case 0x100B:entry_name = "shareparam.json";break;
+    case 0x100C:entry_name = "shareoverlayimage.png";break;
+    case 0x100D:entry_name = "save_data.png";break;
+    case 0x100E:entry_name = "shareprivacyguardimage.png";break;
+    case 0x1200:entry_name = "icon0.png";break;
+    case 0x1220:entry_name = "pic0.png";break;
+    case 0x1240:entry_name = "snd0.at9";break;
+    case 0x1260:entry_name = "changeinfo/changeinfo.xml";break;
+    case 0x1280:entry_name = "icon0.dds";break;
+    case 0x12A0:entry_name = "pic0.dds";break;
+    case 0x12C0:entry_name = "pic1.dds";break;
     }
   }
 

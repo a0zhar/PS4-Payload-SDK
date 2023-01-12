@@ -25,12 +25,11 @@ SYSCALL(getdents, 272);
 SYSCALL(lseek, 478);
 SYSCALL(fstatat, 493);
 
-int getFileSize(const char* path) {
-  int fd = open(path, O_RDONLY, 0);
+int getFileSize(char* path) {
+  int fd = open(path, O_RDONLY, 0777);
   if (fd != -1) {
     lseek(fd, 0, SEEK_END);
     int fsize = lseek(fd, 0, SEEK_CUR);
-    lseek(fd, 0, SEEK_SET);
     close(fd);
     return fsize;
   }
@@ -79,6 +78,8 @@ void touch_file(char* destfile) {
 }
 
 void  copyFile(char* sourcefile, char* destfile) {
+  int fSource = open(sourcefile, O_RDONLY, 0777);
+
   // Open source file in read-only mode
   int src = open(sourcefile, O_RDONLY, 0);
   if (src == -1) {
@@ -148,18 +149,15 @@ void copyDirectory(char* sourcedir, char* destdir) {
   closedir(dir);
 }
 
-int _DebugLog(const char* logName, char* msg) {
-  if (logName == NULL || msg == NULL)
-    return 0;
+void debugging_log(char* logName, char* msg) {
+  if (logName == NULL || msg == NULL) return 0;
   int dstFile = open(
     logName,
-    fileExists(logName) ? O_APPEND : O_CREAT | O_WRONLY,
+    (fileExists(logName) ? O_APPEND : O_CREAT) | O_WRONLY,
     SupremePerms
   );
-
   write(dstFile, msg, sizeof(msg));
   write(dstFile, newLinee, strlen(newLinee));
-
   close(dstFile);
   return 1;
 }
@@ -194,52 +192,7 @@ int compareFiles(char* file1, char* file2) {
     close(fd1);
   }
   return result;
-}/*
-int compareFiles(char* file1, char* file2) {
-  int res = 0;
-  int fd1 = open(file1, O_RDONLY, 0);
-  int fd2 = open(file2, O_RDONLY, 0);
-  if (fd1 < 0 || fd2 < 0) {
-    _DebugLog("/data/azLog.txt", "Error opening file");
-    return 0;
-  }
-
-  off_t size1 = getFileSize(fd1);
-  off_t size2 = getFileSize(fd2);
-
-  if (size1 != size2) {
-    _DebugLog("/data/azLog.txt", "Files have different sizes");
-    goto cleanup;
-  }
-
-  char* buffer1 = calloc(1, size1 + 1);
-  if (buffer1 == NULL) {
-    _DebugLog("/data/azLog.txt", "Error allocating buffer1");
-    goto cleanup;
-  }
-  char* buffer2 = calloc(1, size2 + 1);
-  if (buffer2 == NULL) {
-    _DebugLog("/data/azLog.txt", "Error allocating buffer2");
-    free(buffer1);
-    goto cleanup;goto cleanup;
-  }
-
-  ssize_t read1 = read(fd1, buffer1, size1);
-  ssize_t read2 = read(fd2, buffer2, size2);
-  if (read1 != read2) {
-    _DebugLog("/data/azLog.txt", "Total read bytes do not match");
-    goto cleanup;
-  }
-
-  if (memcmp(buffer1, buffer2, size1) == 0) {
-    res = 1;
-  }
-
-cleanup:
-  close(fd1);
-  close(fd2);
-  return res;
-}*/
+}
 
 int rmtree(const char* path) {
   DIR* d = opendir(path);

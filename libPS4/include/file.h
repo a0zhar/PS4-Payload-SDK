@@ -107,12 +107,12 @@ int mount_large_fs(const char* device, const char* mountpoint, const char* fstyp
 void create_iovec(struct iovec** iov, int* iovlen, const char* name, const void* val, size_t len);
 
 // misc functions
-int _DebugLog(const char* logName, char* msg);
+int debugging_log( char* logName, char* msg);
 
 // File Functions
 void copyFile(char* sourcefile, char* destfile);
 int compareFiles(char* fname1, char* fname2);
-int getFileSize(const char* path);
+int getFileSize(char* path);
 int fileExists(char* fname);
 void touch_file(char* destfile);
 

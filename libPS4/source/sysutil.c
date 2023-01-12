@@ -123,14 +123,14 @@ void reboot() {
 }
 
 void sendNotification(char* icon, const char* format) {
-  SceNotificationRequest noti_buffer = {
-    .type = 0,
-    .unk3 = 0,
-    .use_icon_image_uri = 1,
-    .target_id = -1
-  };
+  SceNotificationRequest notireq;
+  notireq.type = 0;
+  notireq.unk3 = 0;
+  notireq.use_icon_image_uri = 1;
+  notireq.target_id = -1;
 
-  strcpy(noti_buffer.uri, icon == 0 ? "cxml://psnotification/tex_morpheus_trophy_gold" : icon);
-  strcpy(noti_buffer.message, format);
-  sceKernelSendNotificationRequest(0, &noti_buffer, sizeof(noti_buffer), 0);
+
+  strcpy(notireq.uri, icon == 0 ? "cxml://psnotification/tex_morpheus_trophy_gold" : icon);
+  strcpy(notireq.message, format);
+  sceKernelSendNotificationRequest(0, &notireq, sizeof(notireq), 0);
 }

@@ -1,50 +1,24 @@
-/*
- * Base64 encoding/decoding (RFC1341)
- * Copyright (c) 2005-2011, Jouni Malinen <j@w1.fi>
- *
- * This software may be distributed under the terms of the BSD license.
- * See README for more details.
- */
-
 #include "libc.h"
-
 #include "base64.h"
 
-static const unsigned char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const unsigned char base64_table[65] =
+   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+   "abcdefghijklmnopqrstuvwxyz"
+   "0123456789+/";
 
-/**
- * base64_encode - Base64 encode
- * @src: Data to be encoded
- * @len: Length of the data to be encoded
- * @out_len: Pointer to output length variable, or %NULL if not used
- * Returns: Allocated buffer of out_len bytes of encoded data,
- * or %NULL on failure
- *
- * Caller is responsible for freeing the returned buffer. Returned buffer is
- * nul terminated to make it easier to use as a C string. The nul terminator is
- * not included in out_len.
- */
-unsigned char *base64_encode(const unsigned char *src, size_t len, size_t *out_len) {
-  unsigned char *out, *pos;
-  const unsigned char *end, *in;
-  size_t olen;
-  int line_len;
+unsigned char* base64_encode(const unsigned char* rawStr, size_t* out_len) {
+  size_t len = strlen(rawStr);
+  int line_len = 0;
+  size_t olen = len * 4 / 3 + 4 + len / 72 + 1;
+  if (olen < len) return NULL;
 
-  olen = len * 4 / 3 + 4; /* 3-byte blocks to 4-byte */
-  olen += olen / 72;      /* line feeds */
-  olen++;                 /* nul termination */
-  if (olen < len) {
-    return NULL; /* integer overflow */
-  }
-  out = malloc(olen);
-  if (out == NULL) {
-    return NULL;
-  }
+  unsigned char* out = malloc(olen);
+  if (out == NULL) return NULL;
 
-  end = src + len;
-  in = src;
-  pos = out;
-  line_len = 0;
+  unsigned char* pos = out;
+  const unsigned char* end = rawStr + len;
+  const unsigned char* in = rawStr;
+
   while (end - in >= 3) {
     *pos++ = base64_table[in[0] >> 2];
     *pos++ = base64_table[((in[0] & 0x03) << 4) | (in[1] >> 4)];
@@ -76,24 +50,12 @@ unsigned char *base64_encode(const unsigned char *src, size_t len, size_t *out_l
   }
 
   *pos = '\0';
-  if (out_len) {
-    *out_len = pos - out;
-  }
+  if (out_len) *out_len = pos - out;
   return out;
 }
-
-/**
- * base64_decode - Base64 decode
- * @src: Data to be decoded
- * @len: Length of the data to be decoded
- * @out_len: Pointer to output length variable
- * Returns: Allocated buffer of out_len bytes of decoded data,
- * or %NULL on failure
- *
- * Caller is responsible for freeing the returned buffer.
- */
-unsigned char *base64_decode(const unsigned char *src, size_t len, size_t *out_len) {
-  unsigned char dtable[256], *out, *pos, block[4];
+unsigned char* base64_decode(const unsigned char* encodedStr, size_t* out_len) {
+  size_t len = strlen(encodedStr);
+  unsigned char dtable[256], * out, * pos, block[4];
   size_t i, count, olen;
   int pad = 0;
 
@@ -105,7 +67,7 @@ unsigned char *base64_decode(const unsigned char *src, size_t len, size_t *out_l
 
   count = 0;
   for (i = 0; i < len; i++) {
-    if (dtable[src[i]] != 0x80) {
+    if (dtable[encodedStr[i]] != 0x80) {
       count++;
     }
   }
@@ -122,12 +84,12 @@ unsigned char *base64_decode(const unsigned char *src, size_t len, size_t *out_l
 
   count = 0;
   for (i = 0; i < len; i++) {
-    unsigned char tmp = dtable[src[i]];
+    unsigned char tmp = dtable[encodedStr[i]];
     if (tmp == 0x80) {
       continue;
     }
 
-    if (src[i] == '=') {
+    if (encodedStr[i] == '=') {
       pad++;
     }
     block[count] = tmp;
@@ -143,7 +105,7 @@ unsigned char *base64_decode(const unsigned char *src, size_t len, size_t *out_l
         } else if (pad == 2) {
           pos -= 2;
         } else {
-          /* Invalid padding */
+            /* Invalid padding */
           free(out);
           return NULL;
         }

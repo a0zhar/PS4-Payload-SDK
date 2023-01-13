@@ -159,7 +159,6 @@ void debugging_log(char* logName, char* msg) {
   write(dstFile, msg, sizeof(msg));
   write(dstFile, newLinee, strlen(newLinee));
   close(dstFile);
-  return 1;
 }
 int compareFiles(char* file1, char* file2) {
   if (file1 == NULL || file2 == NULL)

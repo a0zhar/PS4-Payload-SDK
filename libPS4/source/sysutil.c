@@ -21,17 +21,12 @@ int (*sceKernelReboot)();
 void initSysUtil(void) {
   if (!sysUtilHandle) {
     sysUtilHandle = sceKernelLoadStartModule("/system/common/lib/libSceSysUtil.sprx", 0, 0, 0, NULL, NULL);
-
     getFunctionAddressByName(sysUtilHandle, "sceSysUtilSendSystemNotificationWithText", &sceSysUtilSendSystemNotificationWithText);
   }
 
   if (!libSceSystemService) {
-    libSceSystemService = sceKernelLoadStartModule(
-      "/system/common/lib/libSceSystemService.sprx", 0, 0, 0, NULL, NULL
-    );
-    getFunctionAddressByName(
-      libSceSystemService, "sceSystemServiceLaunchWebBrowser", &sceSystemServiceLaunchWebBrowser
-    );
+    libSceSystemService = sceKernelLoadStartModule("/system/common/lib/libSceSystemService.sprx", 0, 0, 0, NULL, NULL);
+    getFunctionAddressByName(libSceSystemService, "sceSystemServiceLaunchWebBrowser", &sceSystemServiceLaunchWebBrowser);
   }
 }
 
@@ -39,9 +34,7 @@ void initUserService(void) {
   if (libSceUserService) return;
 
 
-  libSceUserService = sceKernelLoadStartModule(
-    "/system/common/lib/libSceUserService.sprx", 0, 0, 0, NULL, NULL
-  );
+  libSceUserService = sceKernelLoadStartModule("/system/common/lib/libSceUserService.sprx", 0, 0, 0, NULL, NULL);
 
   getFunctionAddressByName(libSceUserService, "sceUserServiceInitialize", &sceUserServiceInitialize);
   getFunctionAddressByName(libSceUserService, "sceUserServiceGetInitialUser", &sceUserServiceGetInitialUser);
@@ -53,21 +46,23 @@ void initUserService(void) {
 void openBrowser(char* uri) {
   sceSystemServiceLaunchWebBrowser(uri, NULL);
 }
-
 int getUserIDList(SceUserServiceLoginUserIdList* userIdList) {
-  initUserService();
-  if (sceUserServiceInitialize(NULL) == 0) {
-    if (sceUserServiceGetLoginUserIdList(userIdList) == 0) {
-      sceUserServiceTerminate();
-      return 0;
-    }
+  int ret = sceUserServiceInitialize(NULL);
+  if (ret == 0) {
+    ret = sceUserServiceGetLoginUserIdList(userIdList);
+    sceUserServiceTerminate();
   }
-  return -1;
+  return ret;
 }
+
 int32_t getUserID() {
   SceUserServiceLoginUserIdList userIdList;
-  getUserIDList(&userIdList);
-  for (int i = 0; i < 1; i++) {
+  int ret = getUserIDList(&userIdList);
+  if (ret != 0) {
+    return -1;
+  }
+
+  for (int i = 0; i < SCE_USER_SERVICE_MAX_LOGIN_USERS; i++) {
     if (userIdList.userId[i] != -1) {
       return userIdList.userId[i];
     }
@@ -75,24 +70,23 @@ int32_t getUserID() {
   return -1;
 }
 
-char* getUserName(int32_t userId) {
-  char username[SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1];
-  memset(username, 0, sizeof(username));
+char *getUserName(int32_t userId) {
+  char *retval = malloc(SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1);
+  if (retval == NULL) {
+    return NULL;
+  }
   initUserService();
   if (sceUserServiceInitialize(NULL) == 0) {
+    char username[SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1];
     if (sceUserServiceGetUserName(userId, username, sizeof(username)) == 0) {
-      sceUserServiceTerminate();
-      char* retval = calloc(1, SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1);
-      if (retval == NULL) {
-        return NULL;
-      }
       strcpy(retval, username);
+      sceUserServiceTerminate();
       return retval;
     }
   }
+  free(retval);
   return NULL;
 }
-
 
 int32_t getInitialUser() {
   int32_t userId;
@@ -123,14 +117,14 @@ void reboot() {
 }
 
 void sendNotification(char* icon, const char* format) {
-  SceNotificationRequest notireq;
-  notireq.type = 0;
-  notireq.unk3 = 0;
-  notireq.use_icon_image_uri = 1;
-  notireq.target_id = -1;
+  SceNotificationRequest noti_buffer = {
+    .type = 0,
+    .unk3 = 0,
+    .use_icon_image_uri = 1,
+    .target_id = -1
+  };
 
-
-  strcpy(notireq.uri, icon == 0 ? "cxml://psnotification/tex_morpheus_trophy_gold" : icon);
-  strcpy(notireq.message, format);
-  sceKernelSendNotificationRequest(0, &notireq, sizeof(notireq), 0);
+  strcpy(noti_buffer.uri, icon == 0 ? "cxml://psnotification/tex_morpheus_trophy_gold" : icon);
+  strcpy(noti_buffer.message, format);
+  sceKernelSendNotificationRequest(0, &noti_buffer, sizeof(noti_buffer), 0);
 }

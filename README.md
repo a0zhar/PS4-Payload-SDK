@@ -12,6 +12,7 @@ Update v0.3  (Friday, January 13, 2023)
   - In the getUserID function, I added a check to see if the getUserIDList function failed, and return -1 if it did.
   - I also changed the loop to iterate over all users in the userId array, not just the first one.
   - I changed the `const char*` parameter in both _DebugLog and getFileSize function, to `char*`.
+  - I Refactored the Base64_encode/base64_decode functions. 
 
 - Upcoming in next Update!
   - Simple Socket Communication between your PC and PS4. As well as a socket server that runs on your PC to receive messages being sent from the PS4.

@@ -7,7 +7,7 @@ static const unsigned char base64_table[65] =
    "0123456789+/";
 
 unsigned char* base64_encode(const unsigned char* rawStr, size_t* out_len) {
-  size_t len = strlen(rawStr);
+  size_t len = sizeof(rawStr);
   int line_len = 0;
   size_t olen = len * 4 / 3 + 4 + len / 72 + 1;
   if (olen < len) return NULL;
@@ -54,7 +54,7 @@ unsigned char* base64_encode(const unsigned char* rawStr, size_t* out_len) {
   return out;
 }
 unsigned char* base64_decode(const unsigned char* encodedStr, size_t* out_len) {
-  size_t len = strlen(encodedStr);
+  size_t len = sizeof(encodedStr);
   unsigned char dtable[256], * out, * pos, block[4];
   size_t i, count, olen;
   int pad = 0;

@@ -17,6 +17,7 @@ Update v0.3  (Friday, January 13, 2023)
   - Simple Socket Communication between your PC and PS4. As well as a socket server that runs on your PC to receive messages being sent from the PS4.
   - A PS4-compatible recursive directory iterator implementation.
   - Firmware spoofing, similar to GoldHEN, with ASCII-letter support
+  - Timestamp string, which would be returned as `[hh:mm:ss]`
 ---
 Update v0.1 (Sunday, January 8, 2023)
 - Whats new?

@@ -4,8 +4,27 @@
 <br><br>
 
 
-# CHANGELOG 
 
+# CHANGELOG
+
+
+Update v0.4 (Monday, January 16, 2023)
+- Whats new?
+  - Cleanup functions aid in cleaning up after the payload has done its thing; this includes, for example, unloading modules, closing socket connections, and more. So far these files have cleanup function implemented: `libc.c, kernel.c, sysutil.c, network.c, camera.c, pthread.c`
+  <br>
+  
+  - A new macro `EasySckPrint` has been introduced that allows for sending messages between PS4 and PC using Socket. This macro is more efficient and less wasteful with memory thanks to dynamic allocation. Include the following at the beginning of the file you want to use the macro in:
+     ```
+     #define IS_DEBUGGING     // define this if u want to use the macro
+     #define SERVER_IP   ""   // The IP of the server (receiving messages)
+     #define SERVER_PORT 0000 // The port of that server
+     #include "sockcomm.h"    // contains the macro
+     // REST OF YOUR CODE BELOW
+     ```
+  <br>
+ 
+  - New macros that represent the file type of a directory entry have been added! The purpose of these is to replace the S_IS* macros. The following are new: `_DT_BLK, _DT_CHR, _DT_DIR, _DT_FIFO, _DT_LNK, _DT_REG, _DT_SOCK`
+---
 Update v0.3  (Friday, January 13, 2023)
 - Code Improvements: 
   - In the getUserIDList function, I moved the initialization of the user service to the beginning of the function, and added a return value to check if the function succeeded or failed.

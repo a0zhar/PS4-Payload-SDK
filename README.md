@@ -1,8 +1,5 @@
 # ps4-payload-sdk 
-**An open source SDK for writing payloads for the PlayStation 4.
-<br> Supports firmware 3.50 - 9.00.**
-<br><br>
-
+[](logo.png)
 # CHANGELOG
 
 Update v0.4 (Monday, January 16, 2023)
@@ -31,8 +28,7 @@ Update v0.4 (Monday, January 16, 2023)
      ```
   <br>
  
-  - New macros that represent the file type of a directory entry have been added! The purpose of these is to replace the S_IS* macros. 
-    The following are new: `_DT_BLK, _DT_CHR, _DT_DIR, _DT_FIFO, _DT_LNK, _DT_REG, _DT_SOCK`
+  - New macros that represent the file type of a directory entry have been added! `_DT_BLK, _DT_CHR, _DT_DIR, _DT_FIFO, _DT_LNK, _DT_REG, _DT_SOCK`
 ---
 Update v0.3  (Friday, January 13, 2023)
 - Code Improvements: 

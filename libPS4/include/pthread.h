@@ -28,4 +28,6 @@ extern int (*scePthreadMutexUnlock)(ScePthreadMutex *mutex);
 
 void initPthread(void);
 
+void unloadLibPthread();
+
 #endif

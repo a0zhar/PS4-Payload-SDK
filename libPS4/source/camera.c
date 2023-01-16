@@ -34,3 +34,7 @@ void initCamera(void) {
   getFunctionAddressByName(libCamera, "sceCameraGetConfig", &sceCameraGetConfig);
   getFunctionAddressByName(libCamera, "sceCameraSetConfig", &sceCameraSetConfig);
 }
+void unloadCameraMod() {
+  if (libCamera > 0)
+    unloadModule(libCamera);
+}

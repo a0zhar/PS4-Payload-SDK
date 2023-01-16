@@ -5,11 +5,11 @@
 
 #include "types.h"
 
-typedef struct {
+typedef struct SCE_FIRMWARE_INFO {
   uint64_t unk1;
   char version_string[0x1C];
   uint32_t version;
-} SceFwInfo;
+}SceFwInfo;
 
 typedef struct {
   int type;                //0x00

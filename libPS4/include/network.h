@@ -13,7 +13,7 @@
 #define IN_ADDR_ANY 0
 
 #define SOCK_STREAM 1
-#define SOCK_DGRAM 2
+#define SOCK_DGRAM  2
 
 #define SOL_SOCKET 0xffff
 #define SO_NBIO 0x1200
@@ -23,8 +23,17 @@
 
 #define IPPROTO_TCP 6
 #define TCP_NODELAY 1
-
-enum {
+#define SCE_NET_IPPROTO_IP  0
+#define SCE_NET_IPPROTO_ICMP  1
+#define SCE_NET_IPPROTO_IGMP  2
+#define SCE_NET_IPPROTO_TCP  6
+#define SCE_NET_IPPROTO_UDP  17
+#define SCE_NET_SOL_SOCKET  0xffff
+#define SCE_NET_SO_REUSEADDR  0x00000004
+#define SCE_NET_ERROR_EINTR  0x80410104
+#define SCE_NET_SOCKET_ABORT_FLAG_RCV_PRESERVATION  0x00000001
+#define SCE_NET_SOCKET_ABORT_FLAG_SND_PRESERVATION  0x00000002
+/*enum {
   SCE_NET_IPPROTO_IP = 0,
   SCE_NET_IPPROTO_ICMP = 1,
   SCE_NET_IPPROTO_IGMP = 2,
@@ -45,7 +54,7 @@ enum {
   SCE_NET_SOCKET_ABORT_FLAG_RCV_PRESERVATION = 0x00000001,
   SCE_NET_SOCKET_ABORT_FLAG_SND_PRESERVATION = 0x00000002
 };
-
+*/
 struct in_addr {
   unsigned int s_addr;
 };
@@ -98,9 +107,9 @@ typedef struct SceNetEtherAddr {
   uint8_t data[SCE_NET_ETHER_ADDR_LEN];
 } SceNetEtherAddr;
 
-#define SCE_NET_CTL_SSID_LEN (32 + 1)
-#define SCE_NET_CTL_HOSTNAME_LEN (255 + 1)
-#define SCE_NET_CTL_AUTH_NAME_LEN (127 + 1)
+#define SCE_NET_CTL_SSID_LEN 33           // (32 + 1)
+#define SCE_NET_CTL_HOSTNAME_LEN 256      // (255 + 1)
+#define SCE_NET_CTL_AUTH_NAME_LEN 128     // (127 + 1)
 #define SCE_NET_CTL_IPV4_ADDR_STR_LEN (16)
 
 typedef union SceNetCtlInfo {
@@ -127,42 +136,42 @@ typedef union SceNetCtlInfo {
   uint16_t http_proxy_port;
 } SceNetCtlInfo;
 
-extern int *(*sceNetErrnoLoc)(void);
+extern int* (*sceNetErrnoLoc)(void);
 #define sce_net_errno (*sceNetErrnoLoc())
 
-extern int (*sceNetSocket)(const char *, int, int, int);
+extern int (*sceNetSocket)(const char*, int, int, int);
 extern int (*sceNetSocketClose)(int);
-extern int (*sceNetConnect)(int, struct sockaddr *, int);
-extern int (*sceNetSend)(int, const void *, size_t, int);
-extern int (*sceNetBind)(int, struct sockaddr *, int);
+extern int (*sceNetConnect)(int, struct sockaddr*, int);
+extern int (*sceNetSend)(int, const void*, size_t, int);
+extern int (*sceNetBind)(int, struct sockaddr*, int);
 extern int (*sceNetListen)(int, int);
-extern int (*sceNetAccept)(int, struct sockaddr *, unsigned int *);
-extern int (*sceNetRecv)(int, void *, size_t, int);
+extern int (*sceNetAccept)(int, struct sockaddr*, unsigned int*);
+extern int (*sceNetRecv)(int, void*, size_t, int);
 extern int (*sceNetSocketAbort)(int, int);
 
-extern int (*sceNetGetsockname)(int, struct sockaddr *, unsigned int *);
-extern int (*sceNetGetsockopt)(int s, int level, int optname, void *restrict optval, socklen_t *restrict optlen);
-extern int (*sceNetSetsockopt)(int s, int level, int optname, const void *optval, socklen_t optlen);
+extern int (*sceNetGetsockname)(int, struct sockaddr*, unsigned int*);
+extern int (*sceNetGetsockopt)(int s, int level, int optname, void* restrict optval, socklen_t* restrict optlen);
+extern int (*sceNetSetsockopt)(int s, int level, int optname, const void* optval, socklen_t optlen);
 
-extern char (*sceNetInetNtop)(int af, const void *src, char *dst, int size);
-extern int (*sceNetInetPton)(int af, const char *src, void *dst);
+extern char (*sceNetInetNtop)(int af, const void* src, char* dst, int size);
+extern int (*sceNetInetPton)(int af, const char* src, void* dst);
 
-extern uint64_t (*sceNetHtonll)(uint64_t host64);
-extern uint32_t (*sceNetHtonl)(uint32_t host32);
-extern uint16_t (*sceNetHtons)(uint16_t host16);
-extern uint64_t (*sceNetNtohll)(uint64_t net64);
-extern uint32_t (*sceNetNtohl)(uint32_t net32);
-extern uint16_t (*sceNetNtohs)(uint16_t net16);
+extern uint64_t(*sceNetHtonll)(uint64_t host64);
+extern uint32_t(*sceNetHtonl)(uint32_t host32);
+extern uint16_t(*sceNetHtons)(uint16_t host16);
+extern uint64_t(*sceNetNtohll)(uint64_t net64);
+extern uint32_t(*sceNetNtohl)(uint32_t net32);
+extern uint16_t(*sceNetNtohs)(uint16_t net16);
 
 extern int (*sceNetCtlInit)(void);
 extern void (*sceNetCtlTerm)(void);
-extern int (*sceNetCtlGetInfo)(int code, SceNetCtlInfo *info);
+extern int (*sceNetCtlGetInfo)(int code, SceNetCtlInfo* info);
 
 void initNetwork(void);
-int SckConnect(char *hostIP, int hostPort);
+int SckConnect(char* hostIP, int hostPort);
 void SckClose(int socket);
-void SckSend(int socket, char *sdata, int length);
-char *SckRecv(int socket);
-void SckRecvf(int socket, char *destfile);
-
+void SckSend(int socket, char* sdata, int length);
+char* SckRecv(int socket);
+void SckRecvf(int socket, char* destfile);
+void cleanupNet();
 #endif

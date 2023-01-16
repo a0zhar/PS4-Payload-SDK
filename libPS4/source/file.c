@@ -36,24 +36,19 @@ int getFileSize(char* path) {
   return 0;
 }
 
-
 int getSandboxDirectory(char* destination, int* length) {
   return syscall(602, 0, destination, length);
 }
+
 int fileExists(char* fname) {
-  int file = open(fname, O_RDONLY, 0);
-  if (file != -1) {
-    close(file);
-    return 1;
-  }
-  return 0;
+  struct stat buffer;
+  return (stat(fname, &buffer) == 0);
 }
 
 int directoryExists(char* dname) {
-  DIR* dir = opendir(dname);
-  if (dir) {
-    closedir(dir);
-    return 1;
+  struct stat buffer;
+  if (stat(dname, &buffer) == 0) {
+    return S_ISDIR(buffer.st_mode);
   }
   return 0;
 }
@@ -77,11 +72,10 @@ void touch_file(char* destfile) {
   }
 }
 
-void  copyFile(char* sourcefile, char* destfile) {
-  int fSource = open(sourcefile, O_RDONLY, 0777);
+void copyFile(char* sourcefile, char* destfile) {
 
   // Open source file in read-only mode
-  int src = open(sourcefile, O_RDONLY, 0);
+  int src = open(sourcefile, O_RDONLY, 0777);
   if (src == -1) {
     return; // Return early if source file cannot be opened
   }
@@ -113,6 +107,7 @@ void  copyFile(char* sourcefile, char* destfile) {
   close(src);
   close(out);
 }
+
 void copyDirectory(char* sourcedir, char* destdir) {
   DIR* dir = opendir(sourcedir);
   if (!dir) {
@@ -149,16 +144,17 @@ void copyDirectory(char* sourcedir, char* destdir) {
   closedir(dir);
 }
 
-void debugging_log(char* logName, char* msg) {
+int debugging_log(char* logName, char* msg) {
   if (logName == NULL || msg == NULL) return 0;
   int dstFile = open(
     logName,
     (fileExists(logName) ? O_APPEND : O_CREAT) | O_WRONLY,
     SupremePerms
   );
-  write(dstFile, msg, sizeof(msg));
+  write(dstFile, msg, strlen(msg));
   write(dstFile, newLinee, strlen(newLinee));
   close(dstFile);
+  return 1;
 }
 int compareFiles(char* file1, char* file2) {
   if (file1 == NULL || file2 == NULL)

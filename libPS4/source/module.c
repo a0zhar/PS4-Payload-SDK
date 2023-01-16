@@ -1,6 +1,5 @@
 #include "kernel.h"
 #include "syscall.h"
-
 #include "module.h"
 
 int libModule;
@@ -32,4 +31,8 @@ void initModule(void) {
 
   // Just use sceKernelLoadStartModule instead
   getFunctionAddressByName(libModule, "sceSysmoduleLoadModule", &sceSysmoduleLoadModule);
+}
+
+void unloadLibModule() {
+  unloadModule(libModule);
 }

@@ -1,5 +1,4 @@
 #include "syscall.h"
-
 #include "memory.h"
 
 SYSCALL(mmap, 477);

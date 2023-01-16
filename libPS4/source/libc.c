@@ -96,11 +96,10 @@ int memset_s(void* dest, rsize_t destsz, int ch, rsize_t count) {
 }
 
 void initLibc(void) {
-  if (libc) {
-    return;
-  }
+  if (libc) { return; }
 
   libc = sceKernelLoadStartModule("libSceLibcInternal.sprx", 0, 0, 0, NULL, NULL);
+
   getFunctionAddressByName(libc, "malloc", &malloc);
   getFunctionAddressByName(libc, "free", &free);
   getFunctionAddressByName(libc, "calloc", &calloc);
@@ -111,7 +110,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "memcmp", &memcmp);
   getFunctionAddressByName(libc, "memmove", &memmove);
   getFunctionAddressByName(libc, "memmove_s", &memmove_s);
-
+  // --------
   getFunctionAddressByName(libc, "strcpy", &strcpy);
   getFunctionAddressByName(libc, "strncpy", &strncpy);
   getFunctionAddressByName(libc, "strncpy_s", &strncpy_s);
@@ -131,7 +130,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "strstr", &strstr);
   getFunctionAddressByName(libc, "strdup", &strdup);
   getFunctionAddressByName(libc, "strtok", &strtok);
-
+  // --------
   getFunctionAddressByName(libc, "index", &index);
   getFunctionAddressByName(libc, "rindex", &rindex);
   getFunctionAddressByName(libc, "isdigit", &isdigit);
@@ -139,15 +138,15 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "atof", &atof);
   getFunctionAddressByName(libc, "strlcpy", &strlcpy);
   getFunctionAddressByName(libc, "strerror", &strerror);
-
+  // --------
   getFunctionAddressByName(libc, "_Getpctype", &_Getpctype);
   getFunctionAddressByName(libc, "_Stoul", &_Stoul);
   getFunctionAddressByName(libc, "bcopy", &bcopy);
   getFunctionAddressByName(libc, "ceil", &ceil);
-
+  // --------
   getFunctionAddressByName(libc, "srand", &srand);
   getFunctionAddressByName(libc, "rand", &rand);
-
+  // --------
   getFunctionAddressByName(libc, "asctime", &asctime);
   getFunctionAddressByName(libc, "asctime_r", &asctime_r);
   getFunctionAddressByName(libc, "ctime", &ctime);
@@ -158,7 +157,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "localtime", &localtime);
   getFunctionAddressByName(libc, "localtime_r", &localtime_r);
   getFunctionAddressByName(libc, "mktime", &mktime);
-
+  // --------
   getFunctionAddressByName(libc, "opendir", &opendir);
   getFunctionAddressByName(libc, "readdir", &readdir);
   getFunctionAddressByName(libc, "readdir_r", &readdir_r);
@@ -167,9 +166,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "rewinddir", &rewinddir);
   getFunctionAddressByName(libc, "closedir", &closedir);
   getFunctionAddressByName(libc, "dirfd", &dirfd);
-
   getFunctionAddressByName(libc, "getprogname", &getprogname);
-
   getFunctionAddressByName(libc, "fopen", &fopen);
   getFunctionAddressByName(libc, "fread", &fread);
   getFunctionAddressByName(libc, "fwrite", &fwrite);
@@ -177,5 +174,13 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "ftell", &ftell);
   getFunctionAddressByName(libc, "fclose", &fclose);
   getFunctionAddressByName(libc, "fprintf", &fprintf);
+}
 
+
+
+void unloadLibc() {
+  if (libc != 0) {
+    // print feedback here i guess
+    unloadModule(libc);
+  }
 }

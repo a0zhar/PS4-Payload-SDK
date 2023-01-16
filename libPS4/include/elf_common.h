@@ -125,10 +125,12 @@ typedef struct {
 #define ELFOSABI_MONTEREY ELFOSABI_AIX /* Monterey */
 
 /* e_ident */
-#define IS_ELF(ehdr) ((ehdr).e_ident[EI_MAG0] == ELFMAG0 && \
-                      (ehdr).e_ident[EI_MAG1] == ELFMAG1 && \
-                      (ehdr).e_ident[EI_MAG2] == ELFMAG2 && \
-                      (ehdr).e_ident[EI_MAG3] == ELFMAG3)
+#define IS_ELF(ehdr) (                  \
+  (ehdr).e_ident[EI_MAG0] == ELFMAG0 && \
+  (ehdr).e_ident[EI_MAG1] == ELFMAG1 && \
+  (ehdr).e_ident[EI_MAG2] == ELFMAG2 && \
+  (ehdr).e_ident[EI_MAG3] == ELFMAG3    \
+)
 
 /* Values for e_type. */
 #define ET_NONE 0        /* Unknown type. */

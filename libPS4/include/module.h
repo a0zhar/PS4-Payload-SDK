@@ -27,4 +27,6 @@ int unloadModule(int id);
 
 void initModule(void);
 
+void unloadLibModule();
+
 #endif

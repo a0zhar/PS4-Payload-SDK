@@ -31,7 +31,8 @@ void initSysUtil(void) {
 }
 
 void initUserService(void) {
-  if (libSceUserService) return;
+  if (libSceUserService)
+    return;
 
 
   libSceUserService = sceKernelLoadStartModule("/system/common/lib/libSceUserService.sprx", 0, 0, 0, NULL, NULL);
@@ -70,8 +71,8 @@ int32_t getUserID() {
   return -1;
 }
 
-char *getUserName(int32_t userId) {
-  char *retval = malloc(SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1);
+char* getUserName(int32_t userId) {
+  char* retval = malloc(SCE_USER_SERVICE_MAX_USER_NAME_LENGTH + 1);
   if (retval == NULL) {
     return NULL;
   }
@@ -127,4 +128,11 @@ void sendNotification(char* icon, const char* format) {
   strcpy(noti_buffer.uri, icon == 0 ? "cxml://psnotification/tex_morpheus_trophy_gold" : icon);
   strcpy(noti_buffer.message, format);
   sceKernelSendNotificationRequest(0, &noti_buffer, sizeof(noti_buffer), 0);
+}
+
+
+void unloadSysUtil() {
+    unloadModule(libSceSystemService);
+    unloadLibModule(libSceUserService);
+    unloadModule(sysUtilHandle);
 }

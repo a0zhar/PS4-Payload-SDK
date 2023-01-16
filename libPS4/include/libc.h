@@ -4,34 +4,34 @@
 #define LIBC_H
 
 #include "types.h"
-
+extern int libc;
 typedef struct DIR DIR;
 typedef int FILE;
 
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
-
-extern void *(*malloc)(size_t size);
-extern void (*free)(void *ptr);
-extern void *(*calloc)(size_t num, size_t size);
-extern void *(*realloc)(void *ptr, size_t size);
-extern void *(*memalign)(size_t boundary, size_t size);
-extern void *(*memset)(void *destination, int value, size_t num);
-extern void *(*memcpy)(void *destination, const void *source, size_t num);
-extern int (*memcmp)(const void *s1, const void *s2, size_t n);
+// Memory Managment
+extern void *(*malloc)(size_t _Size);
+extern void  (*free)(void *_Buffer);
+extern void *(*calloc)(size_t _Count, size_t _Size);
+extern void *(*realloc)(void *ptr, size_t _Size);
+extern void *(*memalign)(size_t boundary, size_t _Size);
+extern void *(*memset)(void *_Dst, int _Val, size_t _Size);
+extern void *(*memcpy)(void *_Dst, const void *_Src, size_t _Size);
+extern int   (*memcmp)(const void *_Buf1, const void *_Buf2, size_t _Size);
 extern void *(*memmove)(void *dst, const void *src, size_t len);
 extern errno_t (*memmove_s)(void *dest, rsize_t destsz, const void *src, rsize_t count);
-extern char *(*strcpy)(char *destination, const char *source);
-extern char *(*strncpy)(char *destination, const char *source, size_t num);
+extern char *(*strcpy)(char *_Destination, const char *_Source);
+extern char *(*strncpy)(char *_Destination, const char *_Source, size_t _Count);
 extern errno_t *(*strncpy_s)(char *restrict dest, rsize_t destsz, const char *restrict src, rsize_t count);
-extern char *(*strcat)(char *dest, const char *src);
+extern char *(*strcat)(char *_Destination, const char *_Source);
 extern char *(*strncat)(char *dest, const char *src, size_t n);
 extern size_t (*strlen)(const char *s);
 extern int (*strcmp)(const char *s1, const char *s2);
 extern int (*strncmp)(const char *s1, const char *s2, size_t n);
 extern int (*sprintf)(char *str, const char *format, ...);
-extern int (*snprintf)(char *str, size_t size, const char *format, ...);
+extern int (*snprintf)(char *str, size_t _Size, const char *format, ...);
 extern int (*snprintf_s)(char *restrict buffer, rsize_t bufsz, const char *restrict format, ...);
 extern int (*sscanf)(const char *str, const char *format, ...);
 extern int (*strtol)(const char* s1, char** s2, int base);
@@ -47,7 +47,7 @@ extern char *(*rindex)(const char *s, int c);
 extern int (*isdigit)(int c);
 extern int (*atoi)(const char *s);
 extern double (*atof)(const char *s);
-extern size_t (*strlcpy)(char *dst, const char *src, size_t size);
+extern size_t (*strlcpy)(char *dst, const char *src, size_t _Size);
 extern char *(*strerror)(int errnum);
 extern void *(*_Getpctype)();
 extern unsigned long (*_Stoul)(const char *, char **, int);
@@ -79,8 +79,8 @@ extern int (*dirfd)(DIR *dirp);
 extern char *(*getprogname)();
 
 extern FILE *(*fopen)(const char *filename, const char *mode);
-extern size_t (*fread)(void *ptr, size_t size, size_t count, FILE *stream);
-extern size_t (*fwrite)(const void *ptr, size_t size, size_t count, FILE *stream);
+extern size_t (*fread)(void *ptr, size_t _Size, size_t count, FILE *stream);
+extern size_t (*fwrite)(const void *ptr, size_t _Size, size_t count, FILE *stream);
 extern int (*fseek)(FILE *stream, long int offset, int origin);
 extern long int (*ftell)(FILE *stream);
 extern int (*fclose)(FILE *stream);
@@ -89,5 +89,7 @@ extern int (*fprintf)(FILE *stream, const char *format, ...);
 int memset_s(void *s, rsize_t smax, int c, rsize_t n);
 
 void initLibc(void);
+
+void unloadLibc();
 
 #endif

@@ -31,4 +31,6 @@ void shutdown();
 // https://github.com/OSM-Made/PS4-Notify
 void sendNotification(char* icon, const char* format);
 
+void unloadSysUtil();
+
 #endif

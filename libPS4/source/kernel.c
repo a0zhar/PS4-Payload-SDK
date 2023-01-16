@@ -1,6 +1,5 @@
 #include "module.h"
 #include "syscall.h"
-
 #include "kernel.h"
 
 int libKernelHandle;
@@ -54,12 +53,10 @@ int (*setregid)(int rgid, int egid);
 int (*sceKernelSendNotificationRequest)(int device, SceNotificationRequest* req, size_t size, int blocking);
 const char* (*sceKernelGetFsSandboxRandomWord)();
 int (*sceKernelGetSystemSwVersion)(SceFwInfo* fw_info);
-
 uint32_t(*sceKernelGetCpuTemperature)(uint32_t*);
 
 SYSCALL(kill, 37);
 SYSCALL(ioctl, 54);
-
 SYSCALL(kexec, 11);
 
 void initKernel(void) {
@@ -69,11 +66,11 @@ void initKernel(void) {
 
   __error = NULL;
 
-  if (loadModule("libkernel.sprx", &libKernelHandle)) {
-    if (loadModule("libkernel_web.sprx", &libKernelHandle)) {
-      loadModule("libkernel_sys.sprx", &libKernelHandle);
-    }
+  if (loadModule("libkernel.sprx", &libKernelHandle) &&
+    loadModule("libkernel_web.sprx", &libKernelHandle)) {
+    loadModule("libkernel_sys.sprx", &libKernelHandle);
   }
+
 
   getFunctionAddressByName(libKernelHandle, "__stack_chk_guard", &__stack_chk_guard);
   getFunctionAddressByName(libKernelHandle, "__stack_chk_fail", &__stack_chk_fail);
@@ -126,4 +123,10 @@ void initKernel(void) {
   getFunctionAddressByName(libKernelHandle, "sceKernelGetSystemSwVersion", &sceKernelGetSystemSwVersion);
 
   getFunctionAddressByName(libKernelHandle, "sceKernelGetCpuTemperature", &sceKernelGetCpuTemperature);
+}
+
+void unloadLibKernelHandle() {
+  if (libKernelHandle != 0) {
+    unloadModule(libKernelHandle);
+  }
 }

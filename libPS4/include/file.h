@@ -28,6 +28,15 @@
 #define O_TRUNC 0x0400    /* truncate to zero length */
 #define O_EXCL    0x0800     /* error if already exists */
 
+// EXPERIMENTAL ----------------
+#define _DT_BLK 6     //block device file  
+#define _DT_CHR 2     //character device file
+#define _DT_DIR 4     //directory
+#define _DT_FIFO 1    //FIFO (named pipe) file
+#define _DT_LNK 10    //symbolic link
+#define _DT_REG 8     //regular file
+#define _DT_SOCK 12   //socket file  
+//------------------------------
 #define S_ISDIR(m) (((m)&0170000) == 0040000)
 #define S_ISCHR(m) (((m)&0170000) == 0020000)
 #define S_ISBLK(m) (((m)&0170000) == 0060000)
@@ -107,7 +116,7 @@ int mount_large_fs(const char* device, const char* mountpoint, const char* fstyp
 void create_iovec(struct iovec** iov, int* iovlen, const char* name, const void* val, size_t len);
 
 // misc functions
-int debugging_log( char* logName, char* msg);
+int debugging_log(char* logName, char* msg);
 
 // File Functions
 void copyFile(char* sourcefile, char* destfile);

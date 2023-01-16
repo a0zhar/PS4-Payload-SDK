@@ -51,4 +51,6 @@ extern int (*sceCameraSetConfig)(int handle, SceCameraConfig *config);
 
 void initCamera(void);
 
+void unloadCameraMod();
+
 #endif

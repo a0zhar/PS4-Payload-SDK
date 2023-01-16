@@ -1,5 +1,11 @@
-# ps4-payload-sdk 
-[](logo.png)
+---
+<p align="center">
+<img src="logo.png">
+<br>
+Eyy, thanks for checking out my repo. Have a good day :)
+</p>
+
+
 # CHANGELOG
 
 Update v0.4 (Monday, January 16, 2023)

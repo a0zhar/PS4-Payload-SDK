@@ -5,10 +5,14 @@
 Eyy, thanks for checking out my repo. Have a good day :)
 </p>
 
+   
 
 # CHANGELOG
-
-Update v0.4 (Monday, January 16, 2023)
+Update v0.4.1 (Jan 24, 2023)
+- Whats new? 
+  - The sendNotification function has been updated to include variable arguments, added a check for null icon and format, uses snprintf to calculate buffer size and write formatted message to buffer, uses strcpy to copy icon and message to SceNotificationRequest struct, and frees allocated memory after sending the notification request.
+---
+Update v0.4.0 (Jan 16, 2023)
 - Whats new?
   - Cleanup functions aid in cleaning up after the payload has done its thing; this includes, for example, unloading modules, closing socket connections, and more. So far these files have cleanup function implemented: `libc.c, kernel.c, sysutil.c, network.c, camera.c, pthread.c`
   <br>

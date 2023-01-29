@@ -8,6 +8,46 @@ Eyy, thanks for checking out my repo. Have a good day :)
    
 
 # CHANGELOG
+
+Update v0.5.1 (Sunday, Jan 29, 2023)
+- Whats new?
+  - Renamed symlink_exists to symlinkExist
+  - Renamed touch_file to touchFile
+  - Changed the "char*" parameter in symlinkExist, and touchFile to "const char*" because the function doesn't modify the variable anyways.
+  - Refactored the getFileSize function and changed it to be off_t instead of int
+  - Removed the debugging_log function as it is unnecessary.
+  - Added the vsnprintf function.
+---
+Update v0.5 (Saturday, Jan 28, 2023) 
+- Whats new?
+  - The S_IS* macros:
+    - Converted the "stat" macros from preprocessor directives to C functions
+    - Added a mode_t m argument to the functions to take the file mode as input
+    - Changed the return type of the functions from #define to int for better type safety
+    - Updated the function names to be more descriptive and human-readable for improved readability and understanding
+    - Improved maintainability and portability of the code.
+    <br>
+  - Added new macros for file opening options:
+    - O_ASYNC: **sends a signal when data is ready**
+    - O_DIRECT: **enables direct disk access**
+    - O_NOFOLLOW: **does not follow links**
+    - O_SYNC: **enables synchronous writes**
+    - O_DSYNC: **enables synchronous writes of data only**
+    - O_RSYNC: **enables synchronous reads**
+    - O_NOATIME: **does not update the access time**
+    - O_ACCMODE: **get the access mode**
+    - O_DIRECTORY: **fails if the file is not a directory**
+    - O_NOCTTY: **does not assign controlling terminal**
+    - O_CLOEXEC: **set close-on-exec**
+  <br>
+- Improvements
+  - **getFileSize has been optimized/improved**
+    - the fstat() function is used to get the file size, which eliminates the need for an additional lseek() call. This can improve performance, as fstat() is typically faster than lseek().
+    - The off_t type is used for the file size variable, which is specifically designed to hold file sizes, thus it can handle large files.
+    - Error handling is added to check the return value of the open() function, so the function can return an error code if the file cannot be opened. 
+    - The O_CLOEXEC flag is used when calling open() to automatically close the file descriptor when a new process is spawned. This can prevent file descriptor leaks and improve security.
+    -  the function signature was changed to take a const char* instead of a char*. This makes sure the function does not modify the input string, and makes it more robust.
+--- 
 Update v0.4.1 (Jan 24, 2023)
 - Whats new? 
   - The sendNotification function has been updated to include variable arguments, added a check for null icon and format, uses snprintf to calculate buffer size and write formatted message to buffer, uses strcpy to copy icon and message to SceNotificationRequest struct, and frees allocated memory after sending the notification request.

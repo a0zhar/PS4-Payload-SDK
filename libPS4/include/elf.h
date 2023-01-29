@@ -10,7 +10,7 @@
 
 // Swapped
 #define SELF_MAGIC 0x1D3D154F
-#define ELF_MAGIC 0x464C457F
+#define ELF_MAGIC  0x464C457F
 
 typedef struct {
   uint32_t props;

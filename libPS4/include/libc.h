@@ -5,6 +5,7 @@
 
 #include "types.h"
 extern int libc;
+typedef char* va_list;
 typedef struct DIR DIR;
 typedef int FILE;
 
@@ -53,6 +54,7 @@ extern void *(*_Getpctype)();
 extern unsigned long (*_Stoul)(const char *, char **, int);
 extern void (*bcopy)(const void *s1, void *s2, size_t n);
 extern double (*ceil)(double x);
+extern int (*vsnprintf)(char *const _Buffer, const size_t _BufferCount, const char *const _Format, va_list _ArgList);
 
 extern void (*srand)(unsigned int seed);
 extern int (*rand)(void);

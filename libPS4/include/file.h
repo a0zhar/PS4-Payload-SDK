@@ -4,51 +4,44 @@
 #define FILE_H
 
 #include "types.h"
-//Open the file for reading. 
-#define O_RDONLY 0x0000 
 
-//Open the file for writing. 
-#define O_WRONLY 0x0001 
 
-//Open the file for both reading and writing. 
-#define O_RDWR 0x0002 
+#define PATH_MAX 255
+#define MNT_UPDATE 0x0000000000010000ULL /* not real mount, just update */
 
-//This macro is a mask that can be bitwise-ANDed with the file status 
-//flag value to recover the file access mode, assuming that a standard 
-//file access mode is in use. 
-#define O_ACCMODE 0x0003
+#define O_RDONLY    0x0000 //Open the file for reading. 
+#define O_WRONLY    0x0001 //Open the file for writing. 
+#define O_RDWR      0x0002 //Open the file for both reading and writing. 
 
+#define O_NONBLOCK  0x0004 // no delay
+#define O_APPEND    0x0008 // set append mode
+#define O_CREAT     0x0200 // create if nonexistent
+#define O_TRUNC     0x0400 // truncate to zero length
+#define O_EXCL      0x0800 // error if already exists
+
+#define O_ASYNC     0x0040 // send signal when data ready 
+#define O_DIRECT    0x8000 // direct disk access 
+#define O_NOFOLLOW  0x0100 // don't follow links 
+#define O_SYNC      0x0010 // synchronous writes 
+#define O_DSYNC     0x0080 // synchronous writes of data only 
+#define O_RSYNC     0x0400 // synchronous reads 
+#define O_NOATIME   0x0400 // don't update access time
+#define O_ACCMODE   0x0003
+
+#define O_DIRECTORY 0x10000 // fail if not a directory 
+#define O_NOCTTY    0x20000 // don't assign controlling terminal 
+#define O_CLOEXEC   0x80000 // set close-on-exec
 
 #define SupremePerms 0777 //rwxrwxrwx   
 #define newLinee     "\n" //newline
 
-#define O_NONBLOCK 0x0004 /* no delay */
-#define O_APPEND 0x0008   /* set append mode */
-#define O_CREAT 0x0200    /* create if nonexistent */
-#define O_TRUNC 0x0400    /* truncate to zero length */
-#define O_EXCL    0x0800     /* error if already exists */
-
-// EXPERIMENTAL ----------------
-#define _DT_BLK 6     //block device file  
-#define _DT_CHR 2     //character device file
-#define _DT_DIR 4     //directory
-#define _DT_FIFO 1    //FIFO (named pipe) file
-#define _DT_LNK 10    //symbolic link
-#define _DT_REG 8     //regular file
-#define _DT_SOCK 12   //socket file  
-//------------------------------
-#define S_ISDIR(m) (((m)&0170000) == 0040000)
-#define S_ISCHR(m) (((m)&0170000) == 0020000)
-#define S_ISBLK(m) (((m)&0170000) == 0060000)
-#define S_ISREG(m) (((m)&0170000) == 0100000)
-#define S_ISFIFO(m) (((m)&0170000) == 0010000)
-#define S_ISLNK(m) (((m)&0170000) == 0120000)
-#define S_ISSOCK(m) (((m)&0170000) == 0140000)
-#define S_ISWHT(m) (((m)&0170000) == 0160000)
-
-#define PATH_MAX 255
-
-#define MNT_UPDATE 0x0000000000010000ULL /* not real mount, just update */
+#define DT_BLK  6  // block device file  
+#define DT_CHR  2  // character device file
+#define DT_DIR  4  // directory
+#define DT_FIFO 1  // FIFO (named pipe) file
+#define DT_LNK  10 // symbolic link
+#define DT_REG  8  // regular file
+#define DT_SOCK 12 // socket file  
 
 struct stat {
   dev_t st_dev;            /* inode's device */
@@ -85,6 +78,17 @@ struct iovec {
   size_t iov_len;
 };
 
+
+
+int S_ISDIR(mode_t m);
+int S_ISCHR(mode_t m);
+int S_ISBLK(mode_t m);
+int S_ISREG(mode_t m);
+int S_ISFIFO(mode_t m);
+int S_ISLNK(mode_t m);
+int S_ISSOCK(mode_t m);
+int S_ISWHT(mode_t m);
+
 ssize_t read(int fd, void* buf, size_t nbyte);
 ssize_t write(int fd, const void* buf, size_t count);
 int open(const char* path, int flags, int mode);
@@ -109,24 +113,24 @@ int getdents(int fd, char* buf, int count);
 off_t lseek(int fildes, off_t offset, int whence);
 int getSandboxDirectory(char* destination, int* length);
 
-int symlink_exists(const char* fname);
+
+
+int symlinkExsist(const char* fname);
+int fileExists(const char* fname);
+int directoryExists(const char* dname);
+
 int rmtree(const char* path);
 int fgetc_pointer(int fp);
 int mount_large_fs(const char* device, const char* mountpoint, const char* fstype, const char* mode, unsigned int flags);
 void create_iovec(struct iovec** iov, int* iovlen, const char* name, const void* val, size_t len);
 
-// misc functions
-int debugging_log(char* logName, char* msg);
-
 // File Functions
 void copyFile(char* sourcefile, char* destfile);
 int compareFiles(char* fname1, char* fname2);
-int getFileSize(char* path);
-int fileExists(char* fname);
-void touch_file(char* destfile);
+off_t getFileSize(const char* path);
+void touchFile(const char* destfile);
 
 // Directory Functions
-int directoryExists(char* dname);
 void copyDirectory(char* sourcedir, char* destdir);
 
 #endif

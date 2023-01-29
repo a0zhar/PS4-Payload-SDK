@@ -25,27 +25,36 @@ SYSCALL(getdents, 272);
 SYSCALL(lseek, 478);
 SYSCALL(fstatat, 493);
 
-int getFileSize(char* path) {
-  int fd = open(path, O_RDONLY, 0777);
-  if (fd != -1) {
-    lseek(fd, 0, SEEK_END);
-    int fsize = lseek(fd, 0, SEEK_CUR);
+int S_ISDIR(mode_t m) { return ((m & 0170000) == 0040000); }
+int S_ISCHR(mode_t m) { return ((m & 0170000) == 0020000); }
+int S_ISBLK(mode_t m) { return ((m & 0170000) == 0060000); }
+int S_ISREG(mode_t m) { return ((m & 0170000) == 0100000); }
+int S_ISFIFO(mode_t m) { return ((m & 0170000) == 0010000); }
+int S_ISLNK(mode_t m) { return ((m & 0170000) == 0120000); }
+int S_ISSOCK(mode_t m) { return ((m & 0170000) == 0140000); }
+int S_ISWHT(mode_t m) { return ((m & 0170000) == 0160000); }
+
+
+off_t getFileSize(const char* path) {
+  int fd = open(path, O_RDONLY | O_CLOEXEC, 0777);
+  if (fd == -1) return -1;
+
+  struct stat st;
+  if (fstat(fd, &st) == -1) {
     close(fd);
-    return fsize;
+    return -1;
   }
-  return 0;
+  close(fd);
+  return st.st_size;
 }
 
-int getSandboxDirectory(char* destination, int* length) {
-  return syscall(602, 0, destination, length);
-}
 
-int fileExists(char* fname) {
+int fileExists(const char* fname) {
   struct stat buffer;
   return (stat(fname, &buffer) == 0);
 }
 
-int directoryExists(char* dname) {
+int directoryExists(const char* dname) {
   struct stat buffer;
   if (stat(dname, &buffer) == 0) {
     return S_ISDIR(buffer.st_mode);
@@ -53,19 +62,15 @@ int directoryExists(char* dname) {
   return 0;
 }
 
-int symlink_exists(const char* fname) {
+int symlinkExsist(const char* fname) {
   struct stat statbuf;
-  if (lstat(fname, &statbuf) < 0) {
+  if (lstat(fname, &statbuf) < 0)
     return -1;
-  }
-  if (S_ISLNK(statbuf.st_mode) == 1) {
-    return 1;
-  } else {
-    return 0;
-  }
+
+  return (S_ISLNK(statbuf.st_mode) == 1);
 }
 
-void touch_file(char* destfile) {
+void touchFile(const char* destfile) {
   int fd = open(destfile, O_WRONLY | O_CREAT | O_TRUNC, 0777);
   if (fd != -1) {
     close(fd);
@@ -73,7 +78,6 @@ void touch_file(char* destfile) {
 }
 
 void copyFile(char* sourcefile, char* destfile) {
-
   // Open source file in read-only mode
   int src = open(sourcefile, O_RDONLY, 0777);
   if (src == -1) {
@@ -144,18 +148,6 @@ void copyDirectory(char* sourcedir, char* destdir) {
   closedir(dir);
 }
 
-int debugging_log(char* logName, char* msg) {
-  if (logName == NULL || msg == NULL) return 0;
-  int dstFile = open(
-    logName,
-    (fileExists(logName) ? O_APPEND : O_CREAT) | O_WRONLY,
-    SupremePerms
-  );
-  write(dstFile, msg, strlen(msg));
-  write(dstFile, newLinee, strlen(newLinee));
-  close(dstFile);
-  return 1;
-}
 int compareFiles(char* file1, char* file2) {
   if (file1 == NULL || file2 == NULL)
     return 0;
@@ -283,4 +275,9 @@ int mount_large_fs(const char* device, const char* mountpoint, const char* fstyp
     build_iovec(&iov, &iovlen, "mask", mode, -1);
   }
   return nmount(iov, iovlen, flags);
+}
+
+
+int getSandboxDirectory(char* destination, int* length) {
+  return syscall(602, 0, destination, length);
 }

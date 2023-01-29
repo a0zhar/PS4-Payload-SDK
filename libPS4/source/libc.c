@@ -16,6 +16,7 @@ void* (*memcpy)(void* destination, const void* source, size_t num);
 int (*memcmp)(const void* s1, const void* s2, size_t n);
 void* (*memmove)(void* dst, const void* src, size_t len);
 errno_t(*memmove_s)(void* dest, rsize_t destsz, const void* src, rsize_t count);
+
 char* (*strcpy)(char* destination, const char* source);
 char* (*strncpy)(char* destination, const char* source, size_t num);
 errno_t* (*strncpy_s)(char* restrict dest, rsize_t destsz, const char* restrict src, rsize_t count);
@@ -45,7 +46,10 @@ char* (*strerror)(int errnum);
 void* (*_Getpctype)();
 unsigned long (*_Stoul)(const char*, char**, int);
 void (*bcopy)(const void* s1, void* s2, size_t n);
+
 double (*ceil)(double x);
+
+int (*vsnprintf)(char *const _Buffer, const size_t _BufferCount, const char *const _Format, va_list _ArgList);
 
 void (*srand)(unsigned int seed);
 int (*rand)(void);
@@ -110,7 +114,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "memcmp", &memcmp);
   getFunctionAddressByName(libc, "memmove", &memmove);
   getFunctionAddressByName(libc, "memmove_s", &memmove_s);
-  // --------
+
   getFunctionAddressByName(libc, "strcpy", &strcpy);
   getFunctionAddressByName(libc, "strncpy", &strncpy);
   getFunctionAddressByName(libc, "strncpy_s", &strncpy_s);
@@ -130,6 +134,7 @@ void initLibc(void) {
   getFunctionAddressByName(libc, "strstr", &strstr);
   getFunctionAddressByName(libc, "strdup", &strdup);
   getFunctionAddressByName(libc, "strtok", &strtok);
+  resolveFunction(libc, vsnprintf);
   // --------
   getFunctionAddressByName(libc, "index", &index);
   getFunctionAddressByName(libc, "rindex", &rindex);

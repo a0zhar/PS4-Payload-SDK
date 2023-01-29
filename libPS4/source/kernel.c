@@ -60,69 +60,66 @@ SYSCALL(ioctl, 54);
 SYSCALL(kexec, 11);
 
 void initKernel(void) {
-  if (libKernelHandle) {
-    return;
-  }
+  if (libKernelHandle) return;
+  
 
   __error = NULL;
 
-  if (loadModule("libkernel.sprx", &libKernelHandle) &&
-    loadModule("libkernel_web.sprx", &libKernelHandle)) {
-    loadModule("libkernel_sys.sprx", &libKernelHandle);
+  if (loadModule("libkernel.sprx", &libKernelHandle) && 
+      loadModule("libkernel_web.sprx", &libKernelHandle)) {
+      loadModule("libkernel_sys.sprx", &libKernelHandle);
   }
 
+  resolveFunction(libKernelHandle, __stack_chk_guard);
+  resolveFunction(libKernelHandle, __stack_chk_fail);
+  resolveFunction(libKernelHandle, __error);
 
-  getFunctionAddressByName(libKernelHandle, "__stack_chk_guard", &__stack_chk_guard);
-  getFunctionAddressByName(libKernelHandle, "__stack_chk_fail", &__stack_chk_fail);
-  getFunctionAddressByName(libKernelHandle, "__error", &__error);
+  resolveFunction(libKernelHandle, sceKernelError);
 
-  getFunctionAddressByName(libKernelHandle, "sceKernelError", &sceKernelError);
+  resolveFunction(libKernelHandle, sceKernelLoadStartModule);
 
-  getFunctionAddressByName(libKernelHandle, "sceKernelLoadStartModule", &sceKernelLoadStartModule);
+  resolveFunction(libKernelHandle, sceKernelAllocateDirectMemory);
+  resolveFunction(libKernelHandle, sceKernelMapDirectMemory);
+  resolveFunction(libKernelHandle, sceKernelGetDirectMemorySize);
 
-  getFunctionAddressByName(libKernelHandle, "sceKernelAllocateDirectMemory", &sceKernelAllocateDirectMemory);
-  getFunctionAddressByName(libKernelHandle, "sceKernelMapDirectMemory", &sceKernelMapDirectMemory);
-  getFunctionAddressByName(libKernelHandle, "sceKernelGetDirectMemorySize", &sceKernelGetDirectMemorySize);
+  resolveFunction(libKernelHandle, sceKernelStat);
+  resolveFunction(libKernelHandle, sceKernelOpen);
+  resolveFunction(libKernelHandle, sceKernelRead);
+  resolveFunction(libKernelHandle, sceKernelLseek);
+  resolveFunction(libKernelHandle, sceKernelClose);
 
-  getFunctionAddressByName(libKernelHandle, "sceKernelStat", &sceKernelStat);
-  getFunctionAddressByName(libKernelHandle, "sceKernelOpen", &sceKernelOpen);
-  getFunctionAddressByName(libKernelHandle, "sceKernelRead", &sceKernelRead);
-  getFunctionAddressByName(libKernelHandle, "sceKernelLseek", &sceKernelLseek);
-  getFunctionAddressByName(libKernelHandle, "sceKernelClose", &sceKernelClose);
+  resolveFunction(libKernelHandle, sceKernelSleep);
+  resolveFunction(libKernelHandle, sceKernelUsleep);
+  resolveFunction(libKernelHandle, sceKernelGettimeofday);
+  resolveFunction(libKernelHandle, sceKernelGetProcessTime);
+  resolveFunction(libKernelHandle, sceKernelGetCurrentCpu);
 
-  getFunctionAddressByName(libKernelHandle, "sceKernelSleep", &sceKernelSleep);
-  getFunctionAddressByName(libKernelHandle, "sceKernelUsleep", &sceKernelUsleep);
-  getFunctionAddressByName(libKernelHandle, "sceKernelGettimeofday", &sceKernelGettimeofday);
-  getFunctionAddressByName(libKernelHandle, "sceKernelGetProcessTime", &sceKernelGetProcessTime);
-  getFunctionAddressByName(libKernelHandle, "sceKernelGetCurrentCpu", &sceKernelGetCurrentCpu);
+  resolveFunction(libKernelHandle, sysctl);
+  resolveFunction(libKernelHandle, sysctlbyname);
+  resolveFunction(libKernelHandle, sysarch);
+  resolveFunction(libKernelHandle, execve);
 
-  getFunctionAddressByName(libKernelHandle, "sysctl", &sysctl);
-  getFunctionAddressByName(libKernelHandle, "sysctlbyname", &sysctlbyname);
-  getFunctionAddressByName(libKernelHandle, "sysarch", &sysarch);
-  getFunctionAddressByName(libKernelHandle, "execve", &execve);
+  resolveFunction(libKernelHandle, pthread_self);
+  resolveFunction(libKernelHandle, pthread_setaffinity_np);
 
-  getFunctionAddressByName(libKernelHandle, "pthread_self", &pthread_self);
-  getFunctionAddressByName(libKernelHandle, "pthread_setaffinity_np", &pthread_setaffinity_np);
+  resolveFunction(libKernelHandle, sceKernelCreateEqueue);
+  resolveFunction(libKernelHandle, sceKernelDeleteEqueue);
+  resolveFunction(libKernelHandle, sceKernelAddUserEvent);
+  resolveFunction(libKernelHandle, sceKernelAddReadEvent);
 
-  getFunctionAddressByName(libKernelHandle, "sceKernelCreateEqueue", &sceKernelCreateEqueue);
-  getFunctionAddressByName(libKernelHandle, "sceKernelDeleteEqueue", &sceKernelDeleteEqueue);
-  getFunctionAddressByName(libKernelHandle, "sceKernelAddUserEvent", &sceKernelAddUserEvent);
-  getFunctionAddressByName(libKernelHandle, "sceKernelAddReadEvent", &sceKernelAddReadEvent);
+  resolveFunction(libKernelHandle, getuid);
+  resolveFunction(libKernelHandle, getgid);
+  resolveFunction(libKernelHandle, getpid);
 
-  getFunctionAddressByName(libKernelHandle, "getuid", &getuid);
-  getFunctionAddressByName(libKernelHandle, "getgid", &getgid);
-  getFunctionAddressByName(libKernelHandle, "getpid", &getpid);
+  resolveFunction(libKernelHandle, setuid);
+  resolveFunction(libKernelHandle, setgid);
+  resolveFunction(libKernelHandle, setreuid);
+  resolveFunction(libKernelHandle, setregid);
 
-  getFunctionAddressByName(libKernelHandle, "setuid", &setuid);
-  getFunctionAddressByName(libKernelHandle, "setgid", &setgid);
-  getFunctionAddressByName(libKernelHandle, "setreuid", &setreuid);
-  getFunctionAddressByName(libKernelHandle, "setregid", &setregid);
-
-  getFunctionAddressByName(libKernelHandle, "sceKernelSendNotificationRequest", &sceKernelSendNotificationRequest);
-  getFunctionAddressByName(libKernelHandle, "sceKernelGetFsSandboxRandomWord", &sceKernelGetFsSandboxRandomWord);
-  getFunctionAddressByName(libKernelHandle, "sceKernelGetSystemSwVersion", &sceKernelGetSystemSwVersion);
-
-  getFunctionAddressByName(libKernelHandle, "sceKernelGetCpuTemperature", &sceKernelGetCpuTemperature);
+  resolveFunction(libKernelHandle, sceKernelSendNotificationRequest);
+  resolveFunction(libKernelHandle, sceKernelGetFsSandboxRandomWord);
+  resolveFunction(libKernelHandle, sceKernelGetSystemSwVersion);
+  resolveFunction(libKernelHandle, sceKernelGetCpuTemperature);
 }
 
 void unloadLibKernelHandle() {

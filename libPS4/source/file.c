@@ -1,6 +1,6 @@
-#include "libc.h"
-#include "syscall.h"
-#include "file.h"
+#include "../include/libc.h"
+#include "../include/syscall.h"
+#include "../include/file.h"
 
 SYSCALL(read, 3);
 SYSCALL(write, 4);
@@ -35,26 +35,18 @@ int S_ISSOCK(mode_t m) { return ((m & 0170000) == 0140000); }
 int S_ISWHT(mode_t m) { return ((m & 0170000) == 0160000); }
 
 
-off_t getFileSize(const char* path) {
-  int fd = open(path, O_RDONLY | O_CLOEXEC, 0777);
-  if (fd == -1) return -1;
-
+off_t getFileSize(const char *path) {
   struct stat st;
-  if (fstat(fd, &st) == -1) {
-    close(fd);
-    return -1;
-  }
-  close(fd);
-  return st.st_size;
+  return(stat(path, &st) == 0) ? st.st_size : -1;
+
 }
 
-
-int fileExists(const char* fname) {
+int fileExists(const char *fname) {
   struct stat buffer;
   return (stat(fname, &buffer) == 0);
 }
 
-int directoryExists(const char* dname) {
+int directoryExists(const char *dname) {
   struct stat buffer;
   if (stat(dname, &buffer) == 0) {
     return S_ISDIR(buffer.st_mode);
@@ -62,7 +54,7 @@ int directoryExists(const char* dname) {
   return 0;
 }
 
-int symlinkExsist(const char* fname) {
+int symlinkExsist(const char *fname) {
   struct stat statbuf;
   if (lstat(fname, &statbuf) < 0)
     return -1;
@@ -70,14 +62,14 @@ int symlinkExsist(const char* fname) {
   return (S_ISLNK(statbuf.st_mode) == 1);
 }
 
-void touchFile(const char* destfile) {
+void touchFile(const char *destfile) {
   int fd = open(destfile, O_WRONLY | O_CREAT | O_TRUNC, 0777);
   if (fd != -1) {
     close(fd);
   }
 }
 
-void copyFile(char* sourcefile, char* destfile) {
+void copyFile(char *sourcefile, char *destfile) {
   // Open source file in read-only mode
   int src = open(sourcefile, O_RDONLY, 0777);
   if (src == -1) {
@@ -93,7 +85,7 @@ void copyFile(char* sourcefile, char* destfile) {
 
   // Allocate a buffer to hold the file content
   size_t buffer_size = 3194304; // 3.19MB Chunks
-  char* buffer = calloc(1, buffer_size);
+  char *buffer = calloc(1, buffer_size);
   if (buffer == NULL) {
     close(src); // Close source file before returning
     close(out); // Close destination file before returning
@@ -112,13 +104,13 @@ void copyFile(char* sourcefile, char* destfile) {
   close(out);
 }
 
-void copyDirectory(char* sourcedir, char* destdir) {
-  DIR* dir = opendir(sourcedir);
+void copyDirectory(char *sourcedir, char *destdir) {
+  DIR *dir = opendir(sourcedir);
   if (!dir) {
     closedir(dir);
     return;
   }
-  struct dirent* dp;
+  struct dirent *dp;
   struct stat info;
   char src_path[1024];
   char dst_path[1024];
@@ -148,12 +140,9 @@ void copyDirectory(char* sourcedir, char* destdir) {
   closedir(dir);
 }
 
-int compareFiles(char* file1, char* file2) {
-  if (file1 == NULL || file2 == NULL)
-    return 0;
-
-  char* file1Content = 0;
-  char* file2Content = 0;
+int compareFiles(const char *file1, const char *file2) {
+  char *file1Content = 0;
+  char *file2Content = 0;
   int result = 0;
   int fd1 = open(file1, O_RDONLY, 0);
   if (fd1 != NULL) {
@@ -181,17 +170,17 @@ int compareFiles(char* file1, char* file2) {
   return result;
 }
 
-int rmtree(const char* path) {
-  DIR* d = opendir(path);
+int rmtree(const char *path) {
+  DIR *d = opendir(path);
   int r = -1;
 
   if (d) {
-    struct dirent* p;
+    struct dirent *p;
 
     r = 0;
     while (!r && (p = readdir(d))) {
       int r2 = -1;
-      char* buf;
+      char *buf;
       size_t len;
 
       if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) {
@@ -234,12 +223,9 @@ int fgetc_pointer(int fp) {
   return (c);
 }
 
-void build_iovec(struct iovec** iov, int* iovlen, const char* name, const void* val, size_t len) {
-  int i;
-  if (*iovlen < 0) {
-    return;
-  }
-  i = *iovlen;
+void build_iovec(struct iovec **iov, int *iovlen, const char *name, const void *val, size_t len) {
+  if (*iovlen < 0) return;
+  int i = *iovlen;
   *iov = realloc(*iov, sizeof * *iov * (i + 2));
   if (*iov == NULL) {
     *iovlen = -1;
@@ -248,7 +234,7 @@ void build_iovec(struct iovec** iov, int* iovlen, const char* name, const void* 
   (*iov)[i].iov_base = strdup(name);
   (*iov)[i].iov_len = strlen(name) + 1;
   ++i;
-  (*iov)[i].iov_base = (void*)val;
+  (*iov)[i].iov_base = (void *)val;
   if (len == (size_t)-1) {
     if (val != NULL) {
       len = strlen(val) + 1;
@@ -260,8 +246,8 @@ void build_iovec(struct iovec** iov, int* iovlen, const char* name, const void* 
   *iovlen = ++i;
 }
 
-int mount_large_fs(const char* device, const char* mountpoint, const char* fstype, const char* mode, unsigned int flags) {
-  struct iovec* iov = NULL;
+int mount_large_fs(const char *device, const char *mountpoint, const char *fstype, const char *mode, unsigned int flags) {
+  struct iovec *iov = NULL;
   int iovlen = 0;
   build_iovec(&iov, &iovlen, "fstype", fstype, -1);
   build_iovec(&iov, &iovlen, "fspath", mountpoint, -1);
@@ -276,8 +262,6 @@ int mount_large_fs(const char* device, const char* mountpoint, const char* fstyp
   }
   return nmount(iov, iovlen, flags);
 }
-
-
-int getSandboxDirectory(char* destination, int* length) {
-  return syscall(602, 0, destination, length);
+int getSandboxDirectory(const char *_Dest, int *length) {
+  return syscall(SYS_RANDOMIZED_PATH, 0, _Dest, length);
 }

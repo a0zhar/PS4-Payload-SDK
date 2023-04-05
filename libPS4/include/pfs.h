@@ -3,7 +3,7 @@
 #ifndef PFS_H
 #define PFS_H
 
-#include "types.h"
+#include "./types.h"
 
 struct pfs_header_t {
   uint64_t version;

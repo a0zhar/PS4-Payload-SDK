@@ -1,9 +1,8 @@
-#include "file.h"
-#include "kernel.h"
-#include "libc.h"
-#include "module.h"
-
-#include "network.h"
+#include "../include/file.h"
+#include "../include/kernel.h"
+#include "../include/libc.h"
+#include "../include/module.h"
+#include "../include/network.h"
 
 int libNet;
 int libNetCtl;
@@ -92,33 +91,32 @@ int SckConnect(char* hostIP, int hostPort) {
   return sck;
 }
 
-void SckClose(int socket) {
-  sceNetSocketClose(socket);
-}
-
-void SckSend(int socket, char* sdata, int length) {
-  sceNetSend(socket, sdata, length, 0);
-}
-
+#define SckClose sceNetSocketClose
+#define SckSend  sceNetSend
 char* SckRecv(int socket) {
-  char rbuf[4096], * retval = malloc(sizeof(char) * 1);
-  int plen, length = 0, i;
-  while ((plen = sceNetRecv(socket, rbuf, sizeof(rbuf), 0)) > 0) {
-    void* tmp = (char*)realloc(retval, sizeof(char) * (length + plen) + 1);
+  char* retval = NULL;
+  char rbuf[4096];
+  int plen, length = 0;
+
+  do {
+    plen = sceNetRecv(socket, rbuf, sizeof(rbuf), 0);
+    if (plen < 0) {
+      free(retval);
+      return NULL;
+    }
+    length += plen;
+    char* tmp = realloc(retval, length + 1);
     if (tmp == NULL) {
       free(retval);
       return NULL;
-    } else {
-      retval = tmp;
     }
-    for (i = 0; i < plen; i++) {
-      retval[length] = rbuf[i];
-      length++;
-    }
-    memset(rbuf, 0, sizeof rbuf);
-  }
+    retval = tmp;
+    memcpy(retval + length - plen, rbuf, plen);
+  } while (plen == sizeof(rbuf));
+
   return retval;
 }
+
 
 void SckRecvf(int socket, char* destfile) {
   char rbuf[4096];
@@ -133,7 +131,7 @@ void SckRecvf(int socket, char* destfile) {
 void cleanupNet() {
   if (!libNet || !libNetCtl)
     return;
-    
+
   sceNetCtlTerm();
   unloadModule(libNetCtl);
   unloadModule(libNet);

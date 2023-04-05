@@ -3,7 +3,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "types.h"
+#include "./types.h"
 
 //from libSceCamera.sprx firmware 1.76. Other can change
 typedef struct SceCameraStartParameter {

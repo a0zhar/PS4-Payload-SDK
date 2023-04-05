@@ -3,7 +3,7 @@
 #ifndef USB_H
 #define USB_H
 
-#include "types.h"
+#include "./types.h"
 
 /* Grabbed from libusb (www.libusb.org) */
 

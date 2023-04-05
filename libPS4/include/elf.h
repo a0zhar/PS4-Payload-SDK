@@ -3,16 +3,15 @@
 #ifndef ELF_H
 #define ELF_H
 
-#include "types.h"
-
-#include "elf64.h"
-#include "elf_common.h"
+#include "./types.h"
+#include "./elf64.h"
+#include "./elf_common.h"
 
 // Swapped
 #define SELF_MAGIC 0x1D3D154F
 #define ELF_MAGIC  0x464C457F
 
-typedef struct {
+typedef struct SELF_ENTRY_T {
   uint32_t props;
   uint32_t reserved;
   uint64_t offset;
@@ -21,7 +20,7 @@ typedef struct {
 } SelfEntry;
 
 // SELF Header from: https://www.psdevwiki.com/ps4/SELF_File_Format#SELF_Header_Structure
-typedef struct {
+typedef struct SELF_HEADER_T {
   uint32_t magic; /* File magic. */
 
   // uint32_t unknown;        /* Always 00 01 01 12. */
@@ -29,7 +28,6 @@ typedef struct {
   uint8_t mode;
   uint8_t endian;
   uint8_t attr;
-
   unsigned char content_type; /* 1 on Self, 4 on PUP Entry. */
   unsigned char program_type; /* 0x0 PUP, 0x8 NPDRM Application, 0x9 PLUGIN, 0xC Kernel, 0xE Security Module, 0xF Secure Kernel */
   uint16_t padding;           /* Padding. */
@@ -42,7 +40,7 @@ typedef struct {
 } SelfHeader;
 
 // SCE Header from: https://www.psdevwiki.com/ps4/SELF_File_Format#SCE_Special
-typedef struct {
+typedef struct SCE_HEADER_T {
   uint64_t program_authority_id;
   uint64_t program_type;
   uint64_t app_version;

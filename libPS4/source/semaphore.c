@@ -1,6 +1,6 @@
-#include "syscall.h"
+#include "../include/syscall.h"
 
-#include "semaphore.h"
+#include "../include/semaphore.h"
 
 int createSemaphore(const char *name, int attributes, int startingCount, int maxCount) {
   return syscall(549, name, attributes, startingCount, maxCount, 0);

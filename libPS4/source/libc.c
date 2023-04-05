@@ -1,13 +1,14 @@
-#include "file.h"
-#include "kernel.h"
-#include "module.h"
+#include "../include/file.h"
+#include "../include/kernel.h"
+#include "../include/module.h"
+#include "../include/libc.h"
 
-#include "libc.h"
+int sceLibcModule;
 
-int libc;
 
+// Memory allocation functions
 void* (*malloc)(size_t size);
-void (*free)(void* ptr);
+void  (*free)(void* ptr);
 void* (*calloc)(size_t num, size_t size);
 void* (*realloc)(void* ptr, size_t size);
 void* (*memalign)(size_t boundary, size_t size);
@@ -16,7 +17,10 @@ void* (*memcpy)(void* destination, const void* source, size_t num);
 int (*memcmp)(const void* s1, const void* s2, size_t n);
 void* (*memmove)(void* dst, const void* src, size_t len);
 errno_t(*memmove_s)(void* dest, rsize_t destsz, const void* src, rsize_t count);
+errno_t(*memcpy_s)(void* _Destination, size_t _DestinationSize, const void* _Source, size_t count);
+errno_t(*memset_s)(void* dest, size_t dest_size, int value, size_t count);
 
+// String manipulation functions
 char* (*strcpy)(char* destination, const char* source);
 char* (*strncpy)(char* destination, const char* source, size_t num);
 errno_t* (*strncpy_s)(char* restrict dest, rsize_t destsz, const char* restrict src, rsize_t count);
@@ -33,8 +37,8 @@ int (*strtol)(const char* s1, char** s2, int base);
 char* (*strtok)(char* str, const char* delimiters);
 char* (*strchr)(const char* s, int c);
 char* (*strrchr)(const char* s, int c);
-char* (*strstr)(char* str1, char* str2);
-char* (*strdup)(const char* s);
+char* (*strstr)(const char* _String, const char* _SubString);
+char* (*strdup)(const char* _String);
 char* (*strtok)(char* str, const char* sep);
 char* (*index)(const char* s, int c);
 char* (*rindex)(const char* s, int c);
@@ -46,13 +50,21 @@ char* (*strerror)(int errnum);
 void* (*_Getpctype)();
 unsigned long (*_Stoul)(const char*, char**, int);
 void (*bcopy)(const void* s1, void* s2, size_t n);
+int (*vsnprintf)(char* str, size_t size, const char* format, va_list ap);
 
+// Mathematical functions
 double (*ceil)(double x);
 
-int (*vsnprintf)(char *str, size_t size, const char *format, va_list ap);
-void (*srand)(unsigned int seed);
-int (*rand)(void);
+// Standard I/O functions
+FILE* (*fopen)(const char* filename, const char* mode);
+size_t(*fread)(void* ptr, size_t size, size_t count, FILE* stream);
+size_t(*fwrite)(const void* ptr, size_t size, size_t count, FILE* stream);
+int (*fseek)(FILE* stream, long int offset, int origin);
+long int (*ftell)(FILE* stream);
+int (*fclose)(FILE* stream);
+int (*fprintf)(FILE* stream, const char* format, ...);
 
+// Time functions
 char* (*asctime)(const struct tm* tm);
 char* (*asctime_r)(const struct tm* tm, char* buf);
 char* (*ctime)(const time_t* timep);
@@ -64,6 +76,7 @@ struct tm* (*localtime)(const time_t* timep);
 struct tm* (*localtime_r)(const time_t* timep, struct tm* result);
 time_t(*mktime)(struct tm* tm);
 
+// Directory functions
 DIR* (*opendir)(const char* filename);
 struct dirent* (*readdir)(DIR* dirp);
 int (*readdir_r)(DIR* dirp, struct dirent* entry, struct dirent** result);
@@ -74,117 +87,87 @@ int (*closedir)(DIR* dirp);
 int (*dirfd)(DIR* dirp);
 char* (*getprogname)();
 
-FILE* (*fopen)(const char* filename, const char* mode);
-size_t(*fread)(void* ptr, size_t size, size_t count, FILE* stream);
-size_t(*fwrite)(const void* ptr, size_t size, size_t count, FILE* stream);
-int (*fseek)(FILE* stream, long int offset, int origin);
-long int (*ftell)(FILE* stream);
-int (*fclose)(FILE* stream);
-int (*fprintf)(FILE* stream, const char* format, ...);
-
-int memset_s(void* dest, rsize_t destsz, int ch, rsize_t count) {
-  if ((dest == NULL) || (destsz > RSIZE_MAX) || (count > RSIZE_MAX) || (count > destsz)) {
-    if ((dest != NULL) && !(destsz > RSIZE_MAX)) {
-      for (rsize_t i = 0; i < destsz; ++i) {
-        ((volatile unsigned char*)dest)[i] = ch;
-      }
-    }
-    return 1;
-  } else {
-    for (rsize_t i = 0; i < count; ++i) {
-      ((volatile unsigned char*)dest)[i] = ch;
-    }
-    return 0;
-  }
-}
+// Random number generator functions
+void (*srand)(unsigned int seed);
+int (*rand)(void);
 
 void initLibc(void) {
-  if (libc) { return; }
-
-  libc = sceKernelLoadStartModule("libSceLibcInternal.sprx", 0, 0, 0, NULL, NULL);
-
-  getFunctionAddressByName(libc, "malloc", &malloc);
-  getFunctionAddressByName(libc, "free", &free);
-  getFunctionAddressByName(libc, "calloc", &calloc);
-  getFunctionAddressByName(libc, "realloc", &realloc);
-  getFunctionAddressByName(libc, "memalign", &memalign);
-  getFunctionAddressByName(libc, "memset", &memset);
-  getFunctionAddressByName(libc, "memcpy", &memcpy);
-  getFunctionAddressByName(libc, "memcmp", &memcmp);
-  getFunctionAddressByName(libc, "memmove", &memmove);
-  getFunctionAddressByName(libc, "memmove_s", &memmove_s);
-
-  getFunctionAddressByName(libc, "strcpy", &strcpy);
-  getFunctionAddressByName(libc, "strncpy", &strncpy);
-  getFunctionAddressByName(libc, "strncpy_s", &strncpy_s);
-  getFunctionAddressByName(libc, "strcat", &strcat);
-  getFunctionAddressByName(libc, "strncat", &strncat);
-  getFunctionAddressByName(libc, "strlen", &strlen);
-  getFunctionAddressByName(libc, "strcmp", &strcmp);
-  getFunctionAddressByName(libc, "strncmp", &strncmp);
-  getFunctionAddressByName(libc, "sprintf", &sprintf);
-  getFunctionAddressByName(libc, "snprintf", &snprintf);
-  getFunctionAddressByName(libc, "snprintf_s", &snprintf_s);
-  getFunctionAddressByName(libc, "sscanf", &sscanf);
-  getFunctionAddressByName(libc, "strtol", &strtol);
-  getFunctionAddressByName(libc, "strtok", &strtok);
-  getFunctionAddressByName(libc, "strchr", &strchr);
-  getFunctionAddressByName(libc, "strrchr", &strrchr);
-  getFunctionAddressByName(libc, "strstr", &strstr);
-  getFunctionAddressByName(libc, "strdup", &strdup);
-  getFunctionAddressByName(libc, "strtok", &strtok);
-  resolveFunction(libc, vsnprintf);
-  // --------
-  getFunctionAddressByName(libc, "index", &index);
-  getFunctionAddressByName(libc, "rindex", &rindex);
-  getFunctionAddressByName(libc, "isdigit", &isdigit);
-  getFunctionAddressByName(libc, "atoi", &atoi);
-  getFunctionAddressByName(libc, "atof", &atof);
-  getFunctionAddressByName(libc, "strlcpy", &strlcpy);
-  getFunctionAddressByName(libc, "strerror", &strerror);
-  // --------
-  getFunctionAddressByName(libc, "_Getpctype", &_Getpctype);
-  getFunctionAddressByName(libc, "_Stoul", &_Stoul);
-  getFunctionAddressByName(libc, "bcopy", &bcopy);
-  getFunctionAddressByName(libc, "ceil", &ceil);
-  // --------
-  getFunctionAddressByName(libc, "srand", &srand);
-  getFunctionAddressByName(libc, "rand", &rand);
-  // --------
-  getFunctionAddressByName(libc, "asctime", &asctime);
-  getFunctionAddressByName(libc, "asctime_r", &asctime_r);
-  getFunctionAddressByName(libc, "ctime", &ctime);
-  getFunctionAddressByName(libc, "ctime_r", &ctime_r);
-  getFunctionAddressByName(libc, "time", &time);
-  getFunctionAddressByName(libc, "gmtime", &gmtime);
-  getFunctionAddressByName(libc, "gmtime_s", &gmtime_s);
-  getFunctionAddressByName(libc, "localtime", &localtime);
-  getFunctionAddressByName(libc, "localtime_r", &localtime_r);
-  getFunctionAddressByName(libc, "mktime", &mktime);
-  // --------
-  getFunctionAddressByName(libc, "opendir", &opendir);
-  getFunctionAddressByName(libc, "readdir", &readdir);
-  getFunctionAddressByName(libc, "readdir_r", &readdir_r);
-  getFunctionAddressByName(libc, "telldir", &telldir);
-  getFunctionAddressByName(libc, "seekdir", &seekdir);
-  getFunctionAddressByName(libc, "rewinddir", &rewinddir);
-  getFunctionAddressByName(libc, "closedir", &closedir);
-  getFunctionAddressByName(libc, "dirfd", &dirfd);
-  getFunctionAddressByName(libc, "getprogname", &getprogname);
-  getFunctionAddressByName(libc, "fopen", &fopen);
-  getFunctionAddressByName(libc, "fread", &fread);
-  getFunctionAddressByName(libc, "fwrite", &fwrite);
-  getFunctionAddressByName(libc, "fseek", &fseek);
-  getFunctionAddressByName(libc, "ftell", &ftell);
-  getFunctionAddressByName(libc, "fclose", &fclose);
-  getFunctionAddressByName(libc, "fprintf", &fprintf);
-}
-
-
-
-void unloadLibc() {
-  if (libc != 0) {
-    // print feedback here i guess
-    unloadModule(libc);
+  if (sceLibcModule) { return; }
+  sceLibcModule = sceKernelLoadStartModule("libSceLibcInternal.sprx", 0, 0, 0, 0, 0);
+  if (sceLibcModule) {
+    getFunctionByName(sceLibcModule, "malloc", &malloc);
+    getFunctionByName(sceLibcModule, "free", &free);
+    getFunctionByName(sceLibcModule, "calloc", &calloc);
+    getFunctionByName(sceLibcModule, "realloc", &realloc);
+    getFunctionByName(sceLibcModule, "memalign", &memalign);
+    getFunctionByName(sceLibcModule, "memset", &memset);
+    getFunctionByName(sceLibcModule, "memset_s", &memset_s);
+    getFunctionByName(sceLibcModule, "memcpy", &memcpy);
+    getFunctionByName(sceLibcModule, "memcmp", &memcmp);
+    getFunctionByName(sceLibcModule, "memmove", &memmove);
+    getFunctionByName(sceLibcModule, "memmove_s", &memmove_s);
+    getFunctionByName(sceLibcModule, "strcpy", &strcpy);
+    getFunctionByName(sceLibcModule, "strncpy", &strncpy);
+    getFunctionByName(sceLibcModule, "strncpy_s", &strncpy_s);
+    getFunctionByName(sceLibcModule, "strcat", &strcat);
+    getFunctionByName(sceLibcModule, "strncat", &strncat);
+    getFunctionByName(sceLibcModule, "strlen", &strlen);
+    getFunctionByName(sceLibcModule, "strcmp", &strcmp);
+    getFunctionByName(sceLibcModule, "strncmp", &strncmp);
+    getFunctionByName(sceLibcModule, "sprintf", &sprintf);
+    getFunctionByName(sceLibcModule, "snprintf", &snprintf);
+    getFunctionByName(sceLibcModule, "snprintf_s", &snprintf_s);
+    getFunctionByName(sceLibcModule, "sscanf", &sscanf);
+    getFunctionByName(sceLibcModule, "strtol", &strtol);
+    getFunctionByName(sceLibcModule, "strtok", &strtok);
+    getFunctionByName(sceLibcModule, "strchr", &strchr);
+    getFunctionByName(sceLibcModule, "strrchr", &strrchr);
+    getFunctionByName(sceLibcModule, "strstr", &strstr);
+    getFunctionByName(sceLibcModule, "strdup", &strdup);
+    getFunctionByName(sceLibcModule, "strtok", &strtok);
+    getFunctionByName(sceLibcModule, "vsnprintf", &vsnprintf);
+    getFunctionByName(sceLibcModule, "index", &index);
+    getFunctionByName(sceLibcModule, "rindex", &rindex);
+    getFunctionByName(sceLibcModule, "isdigit", &isdigit);
+    getFunctionByName(sceLibcModule, "atoi", &atoi);
+    getFunctionByName(sceLibcModule, "atof", &atof);
+    getFunctionByName(sceLibcModule, "strlcpy", &strlcpy);
+    getFunctionByName(sceLibcModule, "strerror", &strerror);
+    getFunctionByName(sceLibcModule, "_Getpctype", &_Getpctype);
+    getFunctionByName(sceLibcModule, "_Stoul", &_Stoul);
+    getFunctionByName(sceLibcModule, "bcopy", &bcopy);
+    getFunctionByName(sceLibcModule, "ceil", &ceil);
+    getFunctionByName(sceLibcModule, "srand", &srand);
+    getFunctionByName(sceLibcModule, "rand", &rand);
+    getFunctionByName(sceLibcModule, "asctime", &asctime);
+    getFunctionByName(sceLibcModule, "asctime_r", &asctime_r);
+    getFunctionByName(sceLibcModule, "ctime", &ctime);
+    getFunctionByName(sceLibcModule, "ctime_r", &ctime_r);
+    getFunctionByName(sceLibcModule, "time", &time);
+    getFunctionByName(sceLibcModule, "gmtime", &gmtime);
+    getFunctionByName(sceLibcModule, "gmtime_s", &gmtime_s);
+    getFunctionByName(sceLibcModule, "localtime", &localtime);
+    getFunctionByName(sceLibcModule, "localtime_r", &localtime_r);
+    getFunctionByName(sceLibcModule, "mktime", &mktime);
+    getFunctionByName(sceLibcModule, "opendir", &opendir);
+    getFunctionByName(sceLibcModule, "readdir", &readdir);
+    getFunctionByName(sceLibcModule, "readdir_r", &readdir_r);
+    getFunctionByName(sceLibcModule, "telldir", &telldir);
+    getFunctionByName(sceLibcModule, "seekdir", &seekdir);
+    getFunctionByName(sceLibcModule, "rewinddir", &rewinddir);
+    getFunctionByName(sceLibcModule, "closedir", &closedir);
+    getFunctionByName(sceLibcModule, "dirfd", &dirfd);
+    getFunctionByName(sceLibcModule, "getprogname", &getprogname);
+    getFunctionByName(sceLibcModule, "fopen", &fopen);
+    getFunctionByName(sceLibcModule, "fread", &fread);
+    getFunctionByName(sceLibcModule, "fwrite", &fwrite);
+    getFunctionByName(sceLibcModule, "fseek", &fseek);
+    getFunctionByName(sceLibcModule, "ftell", &ftell);
+    getFunctionByName(sceLibcModule, "fclose", &fclose);
+    getFunctionByName(sceLibcModule, "fprintf", &fprintf);
   }
+
+}
+void unloadLibc() {
+  unloadModule(sceLibcModule);
 }

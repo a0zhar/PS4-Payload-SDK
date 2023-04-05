@@ -1,7 +1,6 @@
-#include "kernel.h"
-#include "module.h"
-
-#include "pad.h"
+#include "../include/kernel.h"
+#include "../include/module.h"
+#include "../include/pad.h"
 
 int libPad;
 
@@ -18,11 +17,11 @@ void initPad(void) {
 
   libPad = sceKernelLoadStartModule("libScePad.sprx", 0, 0, 0, NULL, NULL);
 
-  getFunctionAddressByName(libPad, "scePadInit", &scePadInit);
-  getFunctionAddressByName(libPad, "scePadOpen", &scePadOpen);
-  getFunctionAddressByName(libPad, "scePadClose", &scePadClose);
-  getFunctionAddressByName(libPad, "scePadRead", &scePadRead);
-  getFunctionAddressByName(libPad, "scePadReadState", &scePadReadState);
+  getFunctionByName(libPad, "scePadInit", &scePadInit);
+  getFunctionByName(libPad, "scePadOpen", &scePadOpen);
+  getFunctionByName(libPad, "scePadClose", &scePadClose);
+  getFunctionByName(libPad, "scePadRead", &scePadRead);
+  getFunctionByName(libPad, "scePadReadState", &scePadReadState);
 
   scePadInit();
 }

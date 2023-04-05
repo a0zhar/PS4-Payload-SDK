@@ -1,12 +1,10 @@
-#include "syscall.h"
-#include "memory.h"
-
-SYSCALL(mmap, 477);
-SYSCALL(munmap, 73);
-SYSCALL(mprotect, 74);
-SYSCALL(msync, 65);
-SYSCALL(mlock, 203);
-SYSCALL(munlock, 204);
-
-SYSCALL(getMemoryInfo, 547);
-SYSCALL(getOtherMemoryInfo, 572);
+#include "../include/syscall.h"
+#include "../include/memory.h"
+SYSCALL(mmap, sys_mmap);
+SYSCALL(munmap, sys_munmap);
+SYSCALL(mprotect, sys_mprotect);
+SYSCALL(msync, sys_msync);
+SYSCALL(mlock, sys_mlock);
+SYSCALL(munlock, sys_munlock);
+SYSCALL(getMemoryInfo, sys_query_memory_protection);
+SYSCALL(getOtherMemoryInfo, sys_virtual_query);

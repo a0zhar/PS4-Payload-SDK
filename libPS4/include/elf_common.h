@@ -32,7 +32,7 @@
 #ifndef ELF_COMMON_H
 #define ELF_COMMON_H
 
-#include "types.h"
+#include "./types.h"
 
 /*
  * ELF definitions that are independent of architecture or word size.
@@ -47,17 +47,14 @@
  * not include the padding.
  */
 
-typedef struct {
+typedef struct ELF_NOTE {
   uint32_t n_namesz; /* Length of name. */
   uint32_t n_descsz; /* Length of descriptor. */
   uint32_t n_type;   /* Type of this note. */
 } Elf_Note;
 
-/*
- * The header for GNU-style hash sections.
- */
-
-typedef struct {
+//The header for GNU-style hash sections.
+typedef struct ELF_GNU_HASH_HEADER {
   uint32_t gh_nbuckets;  /* Number of hash buckets. */
   uint32_t gh_symndx;    /* First visible symbol in .dynsym. */
   uint32_t gh_maskwords; /* #maskwords used in bloom filter. */

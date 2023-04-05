@@ -1,38 +1,41 @@
-#include "kernel.h"
-#include "syscall.h"
-#include "module.h"
+#include "../include/syscall.h"
+#include "../include/kernel.h"
+#include "../include/module.h"
 
 int libModule;
 
-int (*sceSysmoduleLoadModule)(int id);
+int (*sceSysmoduleLoadModule)(int handle);
 
-SYSCALL(getFunctionAddressByName, 591);
+SYSCALL(getFunctionByName, 591);
 SYSCALL(getLoadedModules, 592);
 
-int getModuleInfo(int loadedModuleID, struct moduleInfo* destination) {
+int getModuleInfo(int loadedModuleID, moduleInfo *destination) {
   destination->size = sizeof(*destination);
-  return syscall(593, loadedModuleID, destination);
+  return syscall(SYS_DYNLIB_GET_INFO, loadedModuleID, destination);
 }
 
-int loadModule(const char* name, int* idDestination) {
-  return syscall(594, name, 0, idDestination, 0);
+int loadModule(const char *name, int *idDestination) {
+  return syscall(
+    SYS_DYNLIB_LOAD_PRX,
+    name,
+    0,
+    idDestination,
+    0
+  );
 }
 
-int unloadModule(int id) {
-  return syscall(595, id, 0, 0);
+
+int unloadModule(int handle) {
+  return syscall(
+    SYS_DYNLIB_UNLOAD_PRX,
+    handle, 0, 0
+  );
 }
 
 void initModule(void) {
-  if (libModule) {
-    return;
-  }
-
+  if (!libModule) return;
   libModule = sceKernelLoadStartModule("libSceSysmodule.sprx", 0, 0, 0, NULL, NULL);
-
-  // Just use sceKernelLoadStartModule instead
-  getFunctionAddressByName(libModule, "sceSysmoduleLoadModule", &sceSysmoduleLoadModule);
+  getFunctionByName(libModule, "sceSysmoduleLoadModule", &sceSysmoduleLoadModule);
 }
 
-void unloadLibModule() {
-  unloadModule(libModule);
-}
+void unloadLibModule() { unloadModule(libModule); }

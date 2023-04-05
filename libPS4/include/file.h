@@ -3,8 +3,21 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "types.h"
+#include "./types.h"
 
+
+
+#define PERM_IRUSR 0400 //Read permission for owner
+#define PERM_IWUSR 0200 //Write permission for owner
+#define PERM_IXUSR 0100 //Execute permission for owner
+#define PERM_IRGRP 0040 //Read permission for group
+#define PERM_IWGRP 0020 //Write permission for group
+#define PERM_IXGRP 0010 //Execute permission for group
+#define PERM_IROTH 0004 //Read permission for others
+#define PERM_IWOTH 0002 //Write permission for others
+#define PERM_IXOTH 0001 //Execute permission for others
+#define CHUNKSIZE 500000 // 500kb
+#define ERROR_PARAM_NULL 120 // when either one of param is null
 
 #define PATH_MAX 255
 #define MNT_UPDATE 0x0000000000010000ULL /* not real mount, just update */
@@ -111,7 +124,7 @@ int fstatat(int fd, const char* path, struct stat* buf, int flag);
 int lstat(const char* path, struct stat* buf);
 int getdents(int fd, char* buf, int count);
 off_t lseek(int fildes, off_t offset, int whence);
-int getSandboxDirectory(char* destination, int* length);
+int getSandboxDirectory(const char* destination, int* length);
 
 
 
@@ -126,7 +139,7 @@ void create_iovec(struct iovec** iov, int* iovlen, const char* name, const void*
 
 // File Functions
 void copyFile(char* sourcefile, char* destfile);
-int compareFiles(char* fname1, char* fname2);
+int compareFiles(const char* fname1, const char* fname2);
 off_t getFileSize(const char* path);
 void touchFile(const char* destfile);
 

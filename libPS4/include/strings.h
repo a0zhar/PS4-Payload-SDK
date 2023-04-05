@@ -3,10 +3,11 @@
 #ifndef STRINGS_H
 #define STRINGS_H
 
-#include "types.h"
+size_t countInstances(const char * str, const char * word);
 
-char *replace_str(char *str, char *orig, char *rep);
-int split_string(char *str, char c, char ***arr);
+
+char* replaceString(const char*fullStr, const char*oldWord, const char*newWord);
+char** splitString(const char* str, const char* delim, int* count) ;
 char *read_string(int f);
 int substring(char *haystack, char *needle);
 

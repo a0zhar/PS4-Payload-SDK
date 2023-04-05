@@ -1,6 +1,9 @@
-#include "module.h"
-#include "syscall.h"
-#include "kernel.h"
+#include "../include/module.h"
+#include "../include/syscall.h"
+#include "../include/kernel.h"
+SYSCALL(kill, 37);
+SYSCALL(ioctl, 54);
+SYSCALL(kexec, 11);
 
 int libKernelHandle;
 
@@ -9,7 +12,6 @@ void (*__stack_chk_fail)(void);
 int* (*__error)();
 
 int (*sceKernelError)(int);
-
 int (*sceKernelLoadStartModule)(const char* name, size_t argc, const void* argv, unsigned int flags, int, int);
 
 int (*sceKernelAllocateDirectMemory)(off_t searchStart, off_t searchEnd, size_t length, size_t alignment, int type, off_t* physicalAddressDestination);
@@ -55,75 +57,53 @@ const char* (*sceKernelGetFsSandboxRandomWord)();
 int (*sceKernelGetSystemSwVersion)(SceFwInfo* fw_info);
 uint32_t(*sceKernelGetCpuTemperature)(uint32_t*);
 
-SYSCALL(kill, 37);
-SYSCALL(ioctl, 54);
-SYSCALL(kexec, 11);
 
 void initKernel(void) {
   if (libKernelHandle) return;
-  
-
-  __error = NULL;
-
-  if (loadModule("libkernel.sprx", &libKernelHandle) && 
+  if (loadModule("libkernel.sprx", &libKernelHandle) &&
       loadModule("libkernel_web.sprx", &libKernelHandle)) {
       loadModule("libkernel_sys.sprx", &libKernelHandle);
   }
+  if(!libKernelHandle)return;
+  __error = NULL;
 
   resolveFunction(libKernelHandle, __stack_chk_guard);
   resolveFunction(libKernelHandle, __stack_chk_fail);
   resolveFunction(libKernelHandle, __error);
-
   resolveFunction(libKernelHandle, sceKernelError);
-
   resolveFunction(libKernelHandle, sceKernelLoadStartModule);
-
   resolveFunction(libKernelHandle, sceKernelAllocateDirectMemory);
   resolveFunction(libKernelHandle, sceKernelMapDirectMemory);
   resolveFunction(libKernelHandle, sceKernelGetDirectMemorySize);
-
   resolveFunction(libKernelHandle, sceKernelStat);
   resolveFunction(libKernelHandle, sceKernelOpen);
   resolveFunction(libKernelHandle, sceKernelRead);
   resolveFunction(libKernelHandle, sceKernelLseek);
   resolveFunction(libKernelHandle, sceKernelClose);
-
   resolveFunction(libKernelHandle, sceKernelSleep);
   resolveFunction(libKernelHandle, sceKernelUsleep);
   resolveFunction(libKernelHandle, sceKernelGettimeofday);
   resolveFunction(libKernelHandle, sceKernelGetProcessTime);
   resolveFunction(libKernelHandle, sceKernelGetCurrentCpu);
-
   resolveFunction(libKernelHandle, sysctl);
   resolveFunction(libKernelHandle, sysctlbyname);
   resolveFunction(libKernelHandle, sysarch);
   resolveFunction(libKernelHandle, execve);
-
   resolveFunction(libKernelHandle, pthread_self);
   resolveFunction(libKernelHandle, pthread_setaffinity_np);
-
   resolveFunction(libKernelHandle, sceKernelCreateEqueue);
   resolveFunction(libKernelHandle, sceKernelDeleteEqueue);
   resolveFunction(libKernelHandle, sceKernelAddUserEvent);
   resolveFunction(libKernelHandle, sceKernelAddReadEvent);
-
   resolveFunction(libKernelHandle, getuid);
   resolveFunction(libKernelHandle, getgid);
   resolveFunction(libKernelHandle, getpid);
-
   resolveFunction(libKernelHandle, setuid);
   resolveFunction(libKernelHandle, setgid);
   resolveFunction(libKernelHandle, setreuid);
   resolveFunction(libKernelHandle, setregid);
-
   resolveFunction(libKernelHandle, sceKernelSendNotificationRequest);
   resolveFunction(libKernelHandle, sceKernelGetFsSandboxRandomWord);
   resolveFunction(libKernelHandle, sceKernelGetSystemSwVersion);
   resolveFunction(libKernelHandle, sceKernelGetCpuTemperature);
-}
-
-void unloadLibKernelHandle() {
-  if (libKernelHandle != 0) {
-    unloadModule(libKernelHandle);
-  }
 }

@@ -3,7 +3,7 @@
 #ifndef PROC_H
 #define PROC_H
 
-#include "types.h"
+#include "./types.h"
 
 #define CTL_KERN 1
 #define KERN_PROC 14

@@ -31,9 +31,9 @@
 #ifndef ELF64_H
 #define ELF64_H
 
-#include "types.h"
+#include "./types.h"
 
-#include "elf_common.h"
+#include "./elf_common.h"
 
 /*
  * ELF definitions common to all 64-bit architectures.
@@ -87,8 +87,7 @@ typedef struct {
  */
 
 typedef struct {
-  Elf64_Word sh_name;       /* Section name (index into the
-                               section header string table). */
+  Elf64_Word sh_name;       /* Section name (index into the section header string table). */
   Elf64_Word sh_type;       /* Section type. */
   Elf64_Xword sh_flags;     /* Section flags. */
   Elf64_Addr sh_addr;       /* Address in memory image. */
@@ -119,7 +118,7 @@ typedef struct {
  * Dynamic structure.  The ".dynamic" section contains an array of them.
  */
 
-typedef struct {
+typedef struct Elf64_Dyn_t {
   Elf64_Sxword d_tag; /* Entry type. */
   union {
     Elf64_Xword d_val; /* Integer value. */
@@ -132,13 +131,13 @@ typedef struct {
  */
 
 /* Relocations that don't need an addend field. */
-typedef struct {
+typedef struct Elf64_Rel_t {
   Elf64_Addr r_offset; /* Location to be relocated. */
   Elf64_Xword r_info;  /* Relocation type and symbol index. */
 } Elf64_Rel;
 
 /* Relocations that need an addend field. */
-typedef struct {
+typedef struct Elf64_Rela_t {
   Elf64_Addr r_offset;   /* Location to be relocated. */
   Elf64_Xword r_info;    /* Relocation type and symbol index. */
   Elf64_Sxword r_addend; /* Addend. */
@@ -156,15 +155,11 @@ typedef struct {
 #define ELF64_R_TYPE_INFO(data, type) \
   (((Elf64_Xword)(data) << 8) + (Elf64_Xword)(type))
 
-/*
- * Note entry header
- */
+//Note entry header
 typedef Elf_Note Elf64_Nhdr;
 
-/*
- * Move entry
- */
-typedef struct {
+//Move entry
+typedef struct Elf64_Move_t {
   Elf64_Lword m_value;   /* symbol value */
   Elf64_Xword m_info;    /* size + index */
   Elf64_Xword m_poffset; /* symbol offset */
@@ -176,10 +171,8 @@ typedef struct {
 #define ELF64_M_SIZE(info) ((unsigned char)(info))
 #define ELF64_M_INFO(sym, size) (((sym) << 8) + (unsigned char)(size))
 
-/*
- * Hardware/Software capabilities entry
- */
-typedef struct {
+//Hardware/Software capabilities entry
+typedef struct Elf64_Cap_t {
   Elf64_Xword c_tag; /* how to interpret value */
   union {
     Elf64_Xword c_val;
@@ -211,7 +204,7 @@ typedef struct {
 #define ELF64_ST_VISIBILITY(oth) ((oth)&0x3)
 
 /* Structures used by Sun & GNU-style symbol versioning. */
-typedef struct {
+typedef struct Elf64_Verdef_t {
   Elf64_Half vd_version;
   Elf64_Half vd_flags;
   Elf64_Half vd_ndx;
@@ -221,12 +214,12 @@ typedef struct {
   Elf64_Word vd_next;
 } Elf64_Verdef;
 
-typedef struct {
+typedef struct Elf64_Verdaux_t {
   Elf64_Word vda_name;
   Elf64_Word vda_next;
 } Elf64_Verdaux;
 
-typedef struct {
+typedef struct Elf64_Verneed_t {
   Elf64_Half vn_version;
   Elf64_Half vn_cnt;
   Elf64_Word vn_file;
@@ -234,7 +227,7 @@ typedef struct {
   Elf64_Word vn_next;
 } Elf64_Verneed;
 
-typedef struct {
+typedef struct Elf64_Vernaux_t {
   Elf64_Word vna_hash;
   Elf64_Half vna_flags;
   Elf64_Half vna_other;
@@ -244,7 +237,7 @@ typedef struct {
 
 typedef Elf64_Half Elf64_Versym;
 
-typedef struct {
+typedef struct Elf64_Syminfo_t {
   Elf64_Half si_boundto; /* direct bindings - symbol bound to */
   Elf64_Half si_flags;   /* per symbol flags */
 } Elf64_Syminfo;

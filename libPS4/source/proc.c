@@ -1,8 +1,8 @@
-#include "kernel.h"
-#include "libc.h"
-#include "syscall.h"
+#include "../include/kernel.h"
+#include "../include/libc.h"
+#include "../include/syscall.h"
 
-#include "proc.h"
+#include "../include/proc.h"
 
 int findProcess(char *procName) {
   int procPID = 0;

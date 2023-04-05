@@ -1,7 +1,6 @@
-#include "kernel.h"
-#include "module.h"
-
-#include "camera.h"
+#include "../include/kernel.h"
+#include "../include/module.h"
+#include "../include/camera.h"
 
 int libCamera;
 
@@ -17,24 +16,23 @@ int (*sceCameraGetConfig)(int handle, SceCameraConfig* config);
 int (*sceCameraSetConfig)(int handle, SceCameraConfig* config);
 
 void initCamera(void) {
-  if (libCamera) {
-    return;
-  }
+    if (libCamera) {
+        return;
+    }
 
-  libCamera = sceKernelLoadStartModule("libSceCamera.sprx", 0, 0, 0, NULL, NULL);
+    libCamera = sceKernelLoadStartModule("libSceCamera.sprx", 0, 0, 0, NULL, NULL);
 
-  getFunctionAddressByName(libCamera, "sceCameraOpen", &sceCameraOpen);
-  getFunctionAddressByName(libCamera, "sceCameraClose", &sceCameraClose);
-  getFunctionAddressByName(libCamera, "sceCameraIsAttached", &sceCameraIsAttached);
-  getFunctionAddressByName(libCamera, "sceCameraGetFrameData", &sceCameraGetFrameData);
-  getFunctionAddressByName(libCamera, "sceCameraStart", &sceCameraStart);
-  getFunctionAddressByName(libCamera, "sceCameraStop", &sceCameraStop);
-  getFunctionAddressByName(libCamera, "sceCameraGetDeviceInfo", &sceCameraGetDeviceInfo);
-  getFunctionAddressByName(libCamera, "sceCameraGetDeviceConfig", &sceCameraGetDeviceConfig);
-  getFunctionAddressByName(libCamera, "sceCameraGetConfig", &sceCameraGetConfig);
-  getFunctionAddressByName(libCamera, "sceCameraSetConfig", &sceCameraSetConfig);
+    getFunctionByName(libCamera, "sceCameraOpen", &sceCameraOpen);
+    getFunctionByName(libCamera, "sceCameraClose", &sceCameraClose);
+    getFunctionByName(libCamera, "sceCameraIsAttached", &sceCameraIsAttached);
+    getFunctionByName(libCamera, "sceCameraGetFrameData", &sceCameraGetFrameData);
+    getFunctionByName(libCamera, "sceCameraStart", &sceCameraStart);
+    getFunctionByName(libCamera, "sceCameraStop", &sceCameraStop);
+    getFunctionByName(libCamera, "sceCameraGetDeviceInfo", &sceCameraGetDeviceInfo);
+    getFunctionByName(libCamera, "sceCameraGetDeviceConfig", &sceCameraGetDeviceConfig);
+    getFunctionByName(libCamera, "sceCameraGetConfig", &sceCameraGetConfig);
+    getFunctionByName(libCamera, "sceCameraSetConfig", &sceCameraSetConfig);
 }
 void unloadCameraMod() {
-  if (libCamera > 0)
     unloadModule(libCamera);
 }

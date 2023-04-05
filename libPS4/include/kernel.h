@@ -3,7 +3,7 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include "types.h"
+#include "./types.h"
 
 typedef struct SCE_FIRMWARE_INFO {
   uint64_t unk1;
@@ -11,7 +11,8 @@ typedef struct SCE_FIRMWARE_INFO {
   uint32_t version;
 }SceFwInfo;
 
-typedef struct {
+
+typedef struct SCE_NOTIF_REQUEST_T {
   int type;                //0x00
   int req_id;              //0x04
   int priority;            //0x08
@@ -28,10 +29,6 @@ typedef struct {
   char uri[1024];          //0x42D
   char unkstr[1024];       //0x82D
 } SceNotificationRequest;  //Size = 0xC30
-
-typedef struct timeval SceKernelTimeval;
-typedef uint64_t SceKernelEqueue;
-
 extern int libKernelHandle;
 
 extern int** __stack_chk_guard;
@@ -90,5 +87,6 @@ int ioctl(int fd, unsigned long com, void* data);
 int kill(int pid, int signum);
 void initKernel(void);
 int kexec(void* func, void* user_arg);
+void unloadLibKernelHandle();
 
 #endif

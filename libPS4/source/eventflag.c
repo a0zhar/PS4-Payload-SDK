@@ -1,6 +1,6 @@
-#include "syscall.h"
+#include "../include/syscall.h"
 
-#include "eventflag.h"
+#include "../include/eventflag.h"
 
 SYSCALL(createEventFlag, 538);
 SYSCALL(destroyEventFlag, 539);

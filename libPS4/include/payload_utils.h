@@ -3,8 +3,7 @@
 #ifndef PAYLOAD_UTILS_H
 #define PAYLOAD_UTILS_H
 
-#include "types.h"
-
+#include "./types.h"
 struct auditinfo_addr {
   char useless[184];
 };
@@ -56,16 +55,16 @@ struct kpayload_kbase_args {
   struct kpayload_kbase_info *kpayload_kbase_info;
 };
 
-struct kpayload_dump_info {
+typedef struct kpayload_dump_info_t {
   uint16_t fw_version;
   uint64_t kaddr;
   uint64_t uaddr;
   size_t size;
-};
+} kernPLDumpInfo;
 
 struct kpayload_dump_args {
   void *syscall_handler;
-  struct kpayload_dump_info *kpayload_dump_info;
+  kernPLDumpInfo *kpayload_dump_info;
 };
 
 struct kpayload_firmware_info {
@@ -99,30 +98,9 @@ struct kpayload_target_id_args {
 
 #define X86_CR0_WP (1 << 16)
 
-static inline __attribute__((always_inline)) uint64_t __readmsr(unsigned long __register) {
-  unsigned long __edx;
-  unsigned long __eax;
-  __asm__("rdmsr"
-          : "=d"(__edx), "=a"(__eax)
-          : "c"(__register));
-  return (((uint64_t)__edx) << 32) | (uint64_t)__eax;
-}
-
-static inline __attribute__((always_inline)) uint64_t readCr0(void) {
-  uint64_t cr0;
-  __asm__ volatile("movq %0, %%cr0"
-                   : "=r"(cr0)
-                   :
-                   : "memory");
-  return cr0;
-}
-
-static inline __attribute__((always_inline)) void writeCr0(uint64_t cr0) {
-  __asm__ volatile("movq %%cr0, %0"
-                   :
-                   : "r"(cr0)
-                   : "memory");
-}
+static uint64_t __readmsr(unsigned long register_num);
+static uint64_t readCr0(void);
+void writeCr0(uint64_t cr0);
 
 #define copyout_macro(x)                                                    \
   kernel_base = &((uint8_t *)__readmsr(0xC0000082))[-K##x##_XFAST_SYSCALL]; \
@@ -174,72 +152,34 @@ static inline __attribute__((always_inline)) void writeCr0(uint64_t cr0) {
   npdrm_close = &kernel_ptr[K##x##_NPDRM_CLOSE];                            \
   npdrm_ioctl = &kernel_ptr[K##x##_NPDRM_IOCTL];
 
-#define caseentry(id, macro) case id:macro(id);break;
+#define lazyCase(id, macro) case id: macro(id); break;
 
-#define build_kpayload(id, macro)         \
-  switch (id) {                           \
-    caseentry(350, macro);                \
-    caseentry(355, macro);                \
-    caseentry(370, macro);                \
-    caseentry(400, macro);                \
-    caseentry(401, macro);                \
-    caseentry(405, macro);                \
-    caseentry(406, macro);                \
-    caseentry(407, macro);                \
-    caseentry(450, macro);                \
-    caseentry(455, macro);                \
-    caseentry(470, macro);                \
-    caseentry(471, macro);                \
-    caseentry(472, macro);                \
-    caseentry(473, macro);                \
-    caseentry(474, macro);                \
-    caseentry(500, macro);                \
-    caseentry(501, macro);                \
-    caseentry(503, macro);                \
-    caseentry(505, macro);                \
-    caseentry(507, macro);                \
-    caseentry(550, macro);                \
-    caseentry(553, macro);                \
-    caseentry(555, macro);                \
-    caseentry(556, macro);                \
-    caseentry(600, macro);                \
-    caseentry(602, macro);                \
-    caseentry(620, macro);                \
-    caseentry(650, macro);                \
-    caseentry(651, macro);                \
-    caseentry(670, macro);                \
-    caseentry(671, macro);                \
-    caseentry(672, macro);                \
-    caseentry(700, macro);                \
-    caseentry(701, macro);                \
-    caseentry(702, macro);                \
-    caseentry(750, macro);                \
-    caseentry(751, macro);                \
-    caseentry(755, macro);                \
-    caseentry(800, macro);                \
-    caseentry(801, macro);                \
-    caseentry(803, macro);                \
-    caseentry(850, macro);                \
-    caseentry(852, macro);                \
-    caseentry(900, macro);                \
-    caseentry(903, macro);                \
-    caseentry(904, macro);                \
-    caseentry(950, macro);                \
-    caseentry(951, macro);                \
-    caseentry(960, macro);                \
-    caseentry(1000, macro);               \
-    caseentry(1001, macro);               \
-  default:                                \
-    printf_debug("Unsupported firmware"); \
-    return -1;                            \
-  }
+#define build_kpayload(id, macro)                                \
+switch (id) {                                                    \
+  lazyCase(350, macro);lazyCase(355, macro);lazyCase(370, macro);\
+  lazyCase(400, macro);lazyCase(401, macro);lazyCase(405, macro);\
+  lazyCase(406, macro);lazyCase(407, macro);lazyCase(450, macro);\
+  lazyCase(455, macro);lazyCase(470, macro);lazyCase(471, macro);\
+  lazyCase(472, macro);lazyCase(473, macro);lazyCase(474, macro);\
+  lazyCase(500, macro);lazyCase(501, macro);lazyCase(503, macro);\
+  lazyCase(505, macro);lazyCase(507, macro);lazyCase(550, macro);\
+  lazyCase(553, macro);lazyCase(555, macro);lazyCase(556, macro);\
+  lazyCase(600, macro);lazyCase(602, macro);lazyCase(620, macro);\
+  lazyCase(650, macro);lazyCase(651, macro);lazyCase(670, macro);\
+  lazyCase(671, macro);lazyCase(672, macro);lazyCase(700, macro);\
+  lazyCase(701, macro);lazyCase(702, macro);lazyCase(750, macro);\
+  lazyCase(751, macro);lazyCase(755, macro);lazyCase(800, macro);\
+  lazyCase(801, macro);lazyCase(803, macro);lazyCase(850, macro);\
+  lazyCase(852, macro);lazyCase(900, macro);lazyCase(903, macro);\
+  lazyCase(904, macro);lazyCase(950, macro);lazyCase(951, macro);\
+  lazyCase(960, macro);lazyCase(1000, macro);lazyCase(1001, macro);\
+  default: SocketPrintf("Unsupported firmware"); return -1; break;\
+}
 
 int is_fw_spoofed();
 int is_jailbroken();
-
 uint16_t get_firmware();
 int get_firmware_string(char *fw_string);
-
 uint64_t get_kernel_base();
 int get_memory_dump(uint64_t kaddr, uint64_t *dump, size_t size);
 int jailbreak();

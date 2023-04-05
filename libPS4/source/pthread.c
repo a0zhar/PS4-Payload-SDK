@@ -1,7 +1,7 @@
-#include "kernel.h"
-#include "module.h"
+#include "../include/kernel.h"
+#include "../include/module.h"
 
-#include "pthread.h"
+#include "../include/pthread.h"
 
 int libPthread;
 

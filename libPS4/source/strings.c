@@ -42,7 +42,7 @@ char *replaceString(const char *_fullstr, const char *_search, const char *_repl
 }
 
 
-char **splitString(char *str, const char *delimiter, int *count) {
+char **splitString(const char *str, const char *delimiter, int *count) {
   // allocate memory for the array of strings
   char **tokens = malloc(sizeof(char *));
   // Error: Failed to allocate memory for tokens array.
